@@ -1,0 +1,15 @@
+export type Node = { id: string; layer: string; tier: number | string; monitored: boolean; team: string };
+export type Edge = { source: string; target: string; kind: "sync" | "async" };
+export type GraphData = { nodes: Node[]; edges: Edge[]; alerting: string[] };
+export type Hyp = { id: string; service: string; score: number; coverage: number; precision: number; summary: string };
+export type Finding = { id: string; agent: string; kind: string; text: string; effect: "supports" | "weakens" | string };
+export type BoardRow = { hypothesis_id: string; rank: number; service: string; structural_score: number; findings: Finding[] };
+export type Verification = { action: string; service: string; cleared: string[]; remaining: string[]; all_clear: boolean; summary: string };
+export type Result = {
+  investigation: string; root_cause: string | null; confidence: string; reasons: string[];
+  claims: { verified: number; rejected: number }; board: BoardRow[]; verification: Verification | null;
+  message: string; duration_s: number; alerting: string[]; blames_deploy: string | null;
+  actions: { action: string; service: string; deploy_id?: string; rationale: string }[];
+};
+export type Ev = { type: string; agent: string; text: string; t?: number; replay?: boolean;
+  hypotheses?: Hyp[]; verification?: Verification; result?: Result };

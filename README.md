@@ -8,7 +8,7 @@ Hackathon: Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Co
 
 ## Status
 
-Day 1 done: schema, deterministic world generator, failure model, frozen scenarios, read tools, root-cause ranking (101 tests). Rule-based investigation runner and web API done. Claude-backed agents, UI and benchmark runner come next.
+Day 1 done: schema, deterministic world generator, failure model, frozen scenarios, read tools, root-cause ranking (101 tests). Rule-based investigation runner and web API done. Web UI (React + Cytoscape) works against the API. Claude-backed agents come next.
 
 ## Run the tests
 
@@ -19,3 +19,10 @@ pytest backend/tests
 ```
 
 Tests use the embedded `falkordblite` by default. To test against a real server set `FALKORDB_URL=redis://localhost:6379` (CI uses the `falkordb/falkordb` Docker image).
+
+## Run the web screen
+
+```bash
+uvicorn backend.app.main:app --port 8000      # API
+cd frontend && npm install && npm run dev      # UI on http://localhost:5173 (proxies /api)
+```
