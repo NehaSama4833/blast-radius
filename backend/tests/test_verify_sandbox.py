@@ -82,8 +82,8 @@ def test_sandbox_is_isolated_and_time_shifted():
         g.query("MATCH (s:Service {name:'kafka'}) SET s.monitored = true")
         assert get_graph(tmpl).query("MATCH (s:Service {name:'kafka'}) RETURN s.monitored").result_set[0][0] is False
         assert name in sandbox.list_sandboxes()
-        assert sandbox.cleanup_expired(now=later + 60) == []
-        assert sandbox.cleanup_expired(now=later + sandbox.TTL_S + 1) == [name]
+        assert name not in sandbox.cleanup_expired(now=later + 60)          # still fresh (other, older sandboxes may be swept)
+        assert name in sandbox.cleanup_expired(now=later + sandbox.TTL_S + 1)
         assert name not in sandbox.list_sandboxes()
     finally:
         drop_graph(name)
