@@ -8,3 +8,4 @@ dist/
 *.rdb
 *.db
 .DS_Store
+bench/results/

@@ -87,7 +87,7 @@ Each tool is one parameterized Cypher question (values are passed as parameters,
 
 ### 7. Tests and CI
 
-`pytest backend/tests` (90 tests): world determinism (even across Python processes), failure model rules, frozen scenarios, golden numbers for ranking, every tool, read-only enforcement, injection-attempt check, graph copy independence. GitHub Actions (`.github/workflows/ci.yml`) runs them against the real `falkordb/falkordb` Docker image. Note: Docker was not runnable in my sandbox, so the CI file has not been exercised yet; locally everything ran on embedded FalkorDB.
+`pytest backend/tests` (101 tests): world determinism (even across Python processes), failure model rules, frozen scenarios, golden numbers for ranking, every tool, read-only enforcement, injection-attempt check, graph copy independence. GitHub Actions (`.github/workflows/ci.yml`) runs them against the real `falkordb/falkordb` Docker image. Note: Docker was not runnable in my sandbox, so the CI file has not been exercised yet; locally everything ran on embedded FalkorDB.
 
 ## Added later on Day 1 / early Day 2 (no API key needed)
 
@@ -127,9 +127,21 @@ How the agents *think* is a separate, swappable "policy". The one built so far, 
 
 FastAPI. No free text anywhere: every input is a pick from a list, checked against the graph. `/api/sandbox` makes a private copy, `/api/chaos` breaks a service (or "Surprise me") and **never reveals the culprit**, `/api/investigate` streams live events (SSE), `/api/resolve` stores the lesson, `/api/post` sends the **server's own drafted message** to Discord (the client cannot send text, so nobody can make the app post arbitrary content). Protections: per-IP rate limit, a daily investigation cap, and a **replay fallback** (a recorded investigation, clearly labelled "replay") when the cap is hit. Discord posting only accepts real `discord.com/api/webhooks/...` URLs and never allows mentions like @everyone. The current replay was recorded from the no-LLM policy; I will re-record it from a real Claude run once the key is in.
 
+### 15. The model layer — `backend/agents/llm.py`
+
+One small interface over two kinds of provider: Anthropic's API or any OpenAI-style API such as OpenRouter. The agents ask for a "completion" and never care which is used. It also has the **tool loop**: the model may call tools until it answers, with a cap on steps and output tokens, and errors in a tool call are handed back to the model so it can fix them. The key is read only from environment variables, is never printed, and is never stored in the repo. Tested with fake provider responses. Not yet tested against a real model: this sandbox's network policy blocks OpenRouter, but reaches Anthropic's API.
+
+### 16. The benchmark harness — `bench/`
+
+- `bench/docs.py` is the **docs-only baseline** (condition B): the same facts as the graph, written as Markdown pages (service pages, team pages, deploy log, postmortems, runbooks, the live alert log), plus a plain BM25 keyword search (`search_docs`) and `read_doc`. No graph and no dependency traversal, like a typical "search the wiki" agent.
+- `bench/metrics.py` scores each scenario: top-1 and top-3 root cause, was the triggering deploy found, invalid citations, correct and wrong abstentions, and calibration (are "high" verdicts right more often than "low"?), per difficulty tier.
+- `bench/run.py` runs a split. **It refuses the held-out test split unless `--final` is passed**, so nobody tunes on it by accident. Each scenario gets its own fresh graph, and memory write-back is off, because the baseline has no memory.
+
+Honest note on the numbers: the rule-based policy was written while looking at the 10 dev scenarios, so its perfect dev score is a sanity check, not evidence. Only the one-time final run on the 20 test scenarios counts, and it will be reported whatever it shows. The with-a-real-model conditions (graph agents vs docs-only agent) are added once the key works.
+
 ## Not built yet
 
-The Claude-backed agent policy (needs the API key), the UI, and the benchmark runner (graph agents vs docs-only baseline).
+The model-backed agent policies for conditions A and B (need a working API key), and the UI.
 
 ## Small differences from the design doc
 
