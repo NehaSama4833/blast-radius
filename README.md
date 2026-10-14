@@ -8,7 +8,7 @@ Hackathon: Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Co
 
 ## Status
 
-Day 1 done: schema, deterministic world generator, failure model, frozen scenarios, read tools, root-cause ranking (71 tests). Agents, API and UI come next.
+Day 1 done: schema, deterministic world generator, failure model, frozen scenarios, read tools, root-cause ranking (90 tests). Rule-based investigation runner and web API done. Claude-backed agents, UI and benchmark runner come next.
 
 ## Run the tests
 

@@ -151,8 +151,8 @@ def merge(world, outcomes):
                    alerts=alerts, truth=truth)
 
 
-def finalize_alert_ids(outcome):
-    for i, a in enumerate(sorted(outcome.alerts, key=lambda x: -x["age_s"]), start=1):
+def finalize_alert_ids(outcome, start=1):
+    for i, a in enumerate(sorted(outcome.alerts, key=lambda x: -x["age_s"]), start=start):
         a["id"] = f"a-{i}"
     return outcome
 
@@ -161,6 +161,7 @@ def apply_outcome(graph, outcome, now):
     """Write the triggering deploys and alerts into a graph."""
     from backend.world.loader import load_alerts, load_deploys
 
-    finalize_alert_ids(outcome)
+    start = graph.query("MATCH (a:Alert) RETURN count(a)").result_set[0][0] + 1     # ids stay unique across repeated chaos
+    finalize_alert_ids(outcome, start)
     load_deploys(graph, outcome.deploys, now)
     load_alerts(graph, outcome.alerts, now)

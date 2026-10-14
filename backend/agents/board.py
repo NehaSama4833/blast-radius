@@ -7,6 +7,7 @@ An `Investigation` owns Hypothesis and Finding nodes. Agents never see each othe
   * receipts: every Finding/Decision stores the tool calls (tool + parameters) and the graph version it came from.
 """
 import json
+import threading
 import time
 from dataclasses import dataclass, field
 
@@ -51,6 +52,7 @@ class Session:
     claims_rejected: int = 0
     proposed: list = field(default_factory=list)
     _n: int = 0
+    _lock: object = field(default_factory=threading.Lock, repr=False)
 
     # ---- reading ---------------------------------------------------------------------------------------------
     def call(self, agent, tool, args=None):
@@ -61,8 +63,9 @@ class Session:
             res = verify_mitigation(self.graph, **(args or {}))
         else:
             res = call_tool(self.graph, tool, args)
-        self.seen[agent].update(res.cites)
-        self.calls[agent].append(dict(res.receipt, cites=sorted(set(res.cites))))
+        with self._lock:
+            self.seen[agent].update(res.cites)
+            self.calls[agent].append(dict(res.receipt, cites=sorted(set(res.cites))))
         return res
 
     # ---- writing ---------------------------------------------------------------------------------------------
@@ -80,9 +83,10 @@ class Session:
         if not self.graph.query("MATCH (:Investigation {id:$i})-[:CONSIDERS]->(h:Hypothesis {id:$h}) RETURN count(h)",
                                 {"i": self.inv_id, "h": hypothesis_id}).result_set[0][0]:
             raise BoardError(f"{hypothesis_id} is not a hypothesis of {self.inv_id}")
-        self._check_cites(agent, cites)
-        self._n += 1
-        fid = f"f-{self.inv_id}-{self._n}"
+        with self._lock:
+            self._check_cites(agent, cites)
+            self._n += 1
+            fid = f"f-{self.inv_id}-{self._n}"
         edge = "SUPPORTS" if supports else "WEAKENS"
         self.graph.query(f"""MATCH (h:Hypothesis {{id:$h}}), (a:Agent {{name:$agent}})
                              CREATE (f:Finding {{id:$fid, kind:$kind, text:$text, weight:$w, receipt:$receipt}}),
@@ -136,6 +140,15 @@ class Session:
             h = board.setdefault(hid, dict(hypothesis_id=hid, rank=rank, service=svc, structural_score=score, status=status, findings=[]))
             if fid:
                 h["findings"].append(dict(id=fid, agent=agent, kind=kind, text=text, weight=w, effect=rel.lower()))
+        # Reading the board shows the Lead what the findings cite, so the Lead may cite those nodes too.
+        cited = self.graph.query("""MATCH (:Investigation {id:$i})-[:CONSIDERS]->(:Hypothesis)<-[:SUPPORTS|WEAKENS]-(f:Finding)-[:CITES]->(n)
+                                   RETURN labels(n)[0], n.name, n.id, n.handle, n.pattern, n.sha""", {"i": self.inv_id}).result_set
+        with self._lock:
+            for label, name, nid, handle, pattern, sha in cited:
+                key = {"Service": name, "Team": name, "Feature": name, "Customer": name, "Deploy": nid, "Incident": nid, "Alert": nid,
+                       "Person": handle, "Lesson": pattern, "Commit": sha}.get(label)
+                if key is not None:
+                    self.seen["Lead"].add(f"{label}:{key}")
         return sorted(board.values(), key=lambda h: h["rank"])
 
     def verification(self):

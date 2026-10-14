@@ -87,7 +87,7 @@ Each tool is one parameterized Cypher question (values are passed as parameters,
 
 ### 7. Tests and CI
 
-`pytest backend/tests` (71 tests): world determinism (even across Python processes), failure model rules, frozen scenarios, golden numbers for ranking, every tool, read-only enforcement, injection-attempt check, graph copy independence. GitHub Actions (`.github/workflows/ci.yml`) runs them against the real `falkordb/falkordb` Docker image. Note: Docker was not runnable in my sandbox, so the CI file has not been exercised yet; locally everything ran on embedded FalkorDB.
+`pytest backend/tests` (90 tests): world determinism (even across Python processes), failure model rules, frozen scenarios, golden numbers for ranking, every tool, read-only enforcement, injection-attempt check, graph copy independence. GitHub Actions (`.github/workflows/ci.yml`) runs them against the real `falkordb/falkordb` Docker image. Note: Docker was not runnable in my sandbox, so the CI file has not been exercised yet; locally everything ran on embedded FalkorDB.
 
 ## Added later on Day 1 / early Day 2 (no API key needed)
 
@@ -117,9 +117,19 @@ Each visitor gets a private copy of a template world (`sbx_<id>`). Timestamps ar
 
 The same read tools, offered over the Model Context Protocol so Claude Desktop or Claude Code can investigate a graph (stdio, or `--http`). Read tools only; writes stay inside the app behind the checks above. Results include the `cites` list.
 
+### 13. The investigation runner and the no-LLM policy — `backend/agents/runner.py`
+
+`run_investigation` does: Lead ranks the storm and writes the top 3 hypotheses to the graph, then **Impact, Changes, History and People run in parallel** (four threads), each calling only its own tools and writing findings to the board, then the Lead reads the board from the graph, decides, checks the fix with `verify_mitigation`, and drafts the incident message. Every step is also sent out as a live event (for the screen).
+
+How the agents *think* is a separate, swappable "policy". The one built so far, `RulePolicy`, is **deterministic and uses no AI**: it makes the tool calls a careful engineer would and applies plain rules (for example "high confidence only if the fit is strong AND a deploy preceded the storm AND there is a precedent"; "abstain if no single service explains the storm"). It lets the whole pipeline run and be tested without an API key, and it is a useful comparison later (graph tools without the LLM). The Claude-backed policy (needs the key) plugs into the same place. I only ran it on the 10 **dev** scenarios; it finds the true cause in all 9 single-cause ones and abstains on the two-cause one. The held-out test scenarios have not been run.
+
+### 14. The web API — `backend/app/main.py`
+
+FastAPI. No free text anywhere: every input is a pick from a list, checked against the graph. `/api/sandbox` makes a private copy, `/api/chaos` breaks a service (or "Surprise me") and **never reveals the culprit**, `/api/investigate` streams live events (SSE), `/api/resolve` stores the lesson, `/api/post` sends the **server's own drafted message** to Discord (the client cannot send text, so nobody can make the app post arbitrary content). Protections: per-IP rate limit, a daily investigation cap, and a **replay fallback** (a recorded investigation, clearly labelled "replay") when the cap is hit. Discord posting only accepts real `discord.com/api/webhooks/...` URLs and never allows mentions like @everyone. The current replay was recorded from the no-LLM policy; I will re-record it from a real Claude run once the key is in.
+
 ## Not built yet
 
-The agents themselves (Lead + 4 specialists calling Claude; they need the API key), the FastAPI/SSE API, the UI, Discord, and the benchmark runner.
+The Claude-backed agent policy (needs the API key), the UI, and the benchmark runner (graph agents vs docs-only baseline).
 
 ## Small differences from the design doc
 
