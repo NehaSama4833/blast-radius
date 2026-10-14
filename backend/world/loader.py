@@ -14,6 +14,7 @@ def load_world(graph, world, now=None):
     now = int(now if now is not None else time.time())
     ensure_schema(graph)
     ts = lambda age: now - int(age)
+    graph.query("CREATE (:Meta {loaded_at: $now, world: $world})", {"now": now, "world": world["name"]})
 
     _run(graph, "UNWIND $rows AS r CREATE (:Team {name:r.name, channel:r.channel})", world["teams"])
     _run(graph, "UNWIND $rows AS r CREATE (:Service {name:r.name, layer:r.layer, tier:r.tier, language:r.language, monitored:r.monitored})", world["services"])

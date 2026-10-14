@@ -49,6 +49,24 @@ def _next_deploy_id(world, extra):
     return f"d-{n + 1}"
 
 
+def alerting_for(world, broken):
+    """Which services WOULD alert if `broken` services failed (same rules as break_service, no noise).
+    Returns {service: signal}. `world` only needs "services" and "deps"."""
+    svcs = topo.svc_map(world)
+    out = {}
+    for b in broken:
+        deps = topo.sync_dependents(world, b)
+        if svcs[b]["monitored"]:
+            out.setdefault(b, "error_rate")
+        for n in deps:
+            if svcs[n]["monitored"]:
+                out.setdefault(n, "error_rate")
+        for n in topo.async_dependents(world, b):
+            if svcs[n]["monitored"] and n not in deps:
+                out.setdefault(n, "lag")
+    return out
+
+
 def break_service(world, service, change_kind="config", noise=None, rng=None, _id_offset=0, _first_alert_age=None):
     """Break `service` and return an Outcome with the alerts that would fire and the ground truth.
 
