@@ -87,11 +87,39 @@ Each tool is one parameterized Cypher question (values are passed as parameters,
 
 ### 7. Tests and CI
 
-`pytest backend/tests` (51 tests): world determinism (even across Python processes), failure model rules, frozen scenarios, golden numbers for ranking, every tool, read-only enforcement, injection-attempt check, graph copy independence. GitHub Actions (`.github/workflows/ci.yml`) runs them against the real `falkordb/falkordb` Docker image. Note: Docker was not runnable in my sandbox, so the CI file has not been exercised yet; locally everything ran on embedded FalkorDB.
+`pytest backend/tests` (71 tests): world determinism (even across Python processes), failure model rules, frozen scenarios, golden numbers for ranking, every tool, read-only enforcement, injection-attempt check, graph copy independence. GitHub Actions (`.github/workflows/ci.yml`) runs them against the real `falkordb/falkordb` Docker image. Note: Docker was not runnable in my sandbox, so the CI file has not been exercised yet; locally everything ran on embedded FalkorDB.
+
+## Added later on Day 1 / early Day 2 (no API key needed)
+
+### 8. The shared board and the citation check — `backend/agents/board.py`
+
+The agents never talk to each other. They share a **board made of graph nodes**: an `Investigation` has `Hypothesis` nodes (the Lead's top candidates) and `Finding` nodes (what each specialist found, linked `SUPPORTS` or `WEAKENS` to a hypothesis). The Lead decides by reading the board with a graph query (`read_board`), never by reading specialists' chat.
+
+Rules enforced in **code**, not in a prompt:
+- **Scoping:** each agent can only call its own tools and only write its own kind of finding (Changes writes "temporal", History "historical", and so on). Only the Lead proposes actions and records the decision.
+- **Citation check:** the server remembers every node id each agent was shown by a tool. A finding that cites an id the agent never saw is rejected (`CitationError`), as is a finding with no citation. The UI will show "claims verified: N/N".
+- **Receipts:** each Finding and Decision stores which tools were called with which parameters, the graph version, and the node ids read, so an answer can be traced and re-run.
+- **Abstaining:** the Lead may record `root_cause=None` ("undetermined") with low/medium confidence, but never high.
+
+### 9. Memory write-back — `backend/agents/memory.py`
+
+"Mark resolved" (a human click) turns an investigation into an `Incident` with a `Resolution`, and creates or updates a **Lesson** (for example "ledger-db: config change fixed by rollback", times seen, average time to fix). The next investigation finds it through `lessons_for` and `similar_incidents`. This is the "memory that changes behaviour" story. It is switched off during benchmarks, because the docs-only baseline has no memory.
+
+### 10. Prove the fix — `backend/tools/verify.py`
+
+`verify_mitigation` copies the graph (`GRAPH.COPY`), applies a proposed fix to the copy, and recomputes which alerts that one fault explains, using the same rule as the failure model (`alerting_for`). It reports which current alerts would clear, which would remain (for example a second cause), and a drain time for queue lag. It is a **simulation against the dependency graph**, and says so. The copy is deleted afterwards and the real graph is never touched.
+
+### 11. Sandboxes — `backend/graph/sandbox.py`
+
+Each visitor gets a private copy of a template world (`sbx_<id>`). Timestamps are shifted so "now" is true again, the copy expires after 2 hours, and at most 50 exist at once. The state lives inside the database (a `Meta` node), so it survives restarts.
+
+### 12. MCP server — `mcp_server/server.py`
+
+The same read tools, offered over the Model Context Protocol so Claude Desktop or Claude Code can investigate a graph (stdio, or `--http`). Read tools only; writes stay inside the app behind the checks above. Results include the `cites` list.
 
 ## Not built yet
 
-Agents (Lead + 4 specialists), the shared board, citation checking, `verify_mitigation`, write tools, API, UI, Discord, MCP server, benchmark runner. These start Day 2 and need the Claude API key.
+The agents themselves (Lead + 4 specialists calling Claude; they need the API key), the FastAPI/SSE API, the UI, Discord, and the benchmark runner.
 
 ## Small differences from the design doc
 
