@@ -17,8 +17,13 @@ export default function Verdict({ r, sandbox, onFocus }: { r: Result; sandbox: s
         <h3>{undetermined ? "Undetermined" : <>Root cause: <a onClick={() => onFocus(r.root_cause!)}>{r.root_cause}</a></>}</h3>
         <span className="badge">{undetermined ? "no confident answer" : `${r.confidence} confidence`}</span>
       </div>
+      {!undetermined && !r.alerting.includes(r.root_cause!) && (
+        <div className="silent">The culprit never raised an alert of its own. None of the {r.alerting.length} alerting services was the cause.</div>
+      )}
       <ul>{r.reasons.map((x, i) => <li key={i}>{x}</li>)}</ul>
       {r.verification && <p className="sim">Simulation: {r.verification.summary}</p>}
+      {r.impact && <p className="impact">At stake: {r.impact.features.join(", ")} · {r.impact.customers} customers · ${r.impact.arr.toLocaleString()} ARR</p>}
+      {r.people && <p className="impact">Page: {r.people.pick.map(p => `${p.name} (${p.awake ? "awake" : "asleep"}, ${p.local_time})`).join(", ")} in {r.people.channel}</p>}
       <p className="meta">{r.claims.verified} claims checked against the graph, {r.claims.rejected} rejected · {r.duration_s}s</p>
       <div className="btns">
         <button disabled={busy || undetermined} onClick={() => act(() => postToDiscord(sandbox, r.investigation), "Posted the drafted message to the channel.")}>Approve &amp; post</button>

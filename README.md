@@ -2,6 +2,8 @@
 
 > Six alerts at 3 AM. None of them is the problem.
 
+![Blast Radius: the agents found a silent redis-cache behind 14 alerts](docs/screenshot.png)
+
 A team of AI agents that investigates outages by following a company's dependency graph in FalkorDB. Every claim points to the graph path that proves it. Full plan: [docs/DESIGN.md](docs/DESIGN.md). Plain-language explanation: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 Hackathon: Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Connected Data) and 02 (Agent Memory and Coordination).

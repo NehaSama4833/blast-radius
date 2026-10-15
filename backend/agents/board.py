@@ -53,6 +53,7 @@ class Session:
     proposed: list = field(default_factory=list)
     _n: int = 0
     _lock: object = field(default_factory=threading.Lock, repr=False)
+    listener: object = field(default=None, repr=False)     # optional fn(agent, tool, params, cites): lets the UI light up what each agent reads
 
     # ---- reading ---------------------------------------------------------------------------------------------
     def call(self, agent, tool, args=None):
@@ -66,6 +67,11 @@ class Session:
         with self._lock:
             self.seen[agent].update(res.cites)
             self.calls[agent].append(dict(res.receipt, cites=sorted(set(res.cites))))
+        if self.listener:
+            try:
+                self.listener(agent, tool, res.receipt.get("params", {}), sorted(set(res.cites)))
+            except Exception:
+                pass                                         # a UI hook must never break an investigation
         return res
 
     # ---- writing ---------------------------------------------------------------------------------------------
@@ -143,13 +149,17 @@ class Session:
             MATCH (:Investigation {id:$i})-[:CONSIDERS]->(h:Hypothesis)-[:ABOUT]->(s:Service)
             OPTIONAL MATCH (f:Finding)-[r:SUPPORTS|WEAKENS]->(h)
             OPTIONAL MATCH (a:Agent)-[:WROTE]->(f)
-            RETURN h.id, h.rank, h.structural_score, h.status, s.name, f.id, f.kind, f.text, f.weight, type(r), a.name
+            RETURN h.id, h.rank, h.structural_score, h.status, s.name, f.id, f.kind, f.text, f.weight, type(r), a.name, f.receipt
             ORDER BY h.rank, f.id""", {"i": self.inv_id}).result_set
         board = {}
-        for hid, rank, score, status, svc, fid, kind, text, w, rel, agent in rows:
+        for hid, rank, score, status, svc, fid, kind, text, w, rel, agent, receipt in rows:
             h = board.setdefault(hid, dict(hypothesis_id=hid, rank=rank, service=svc, structural_score=score, status=status, findings=[]))
             if fid:
-                h["findings"].append(dict(id=fid, agent=agent, kind=kind, text=text, weight=w, effect=rel.lower()))
+                try:
+                    rc = json.loads(receipt) if receipt else None
+                except ValueError:
+                    rc = None
+                h["findings"].append(dict(id=fid, agent=agent, kind=kind, text=text, weight=w, effect=rel.lower(), receipt=rc))
         # Reading the board shows the Lead what the findings cite, so the Lead may cite those nodes too.
         cited = self.graph.query("""MATCH (:Investigation {id:$i})-[:CONSIDERS]->(:Hypothesis)<-[:SUPPORTS|WEAKENS]-(f:Finding)-[:CITES]->(n)
                                    RETURN labels(n)[0], n.name, n.id, n.handle, n.pattern, n.sha""", {"i": self.inv_id}).result_set

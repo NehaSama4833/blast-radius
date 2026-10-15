@@ -146,6 +146,8 @@ def run_investigation(graph, alerting, now=None, emit=None, policy=None, model="
     alerting = sorted(set(alerting))
     s = start_investigation(graph, alerting, model=getattr(policy, "name", model), now=now)
     ctx = dict(alerting=alerting, n_alerting=len(alerting), now=now, first_alert_ts=_first_alert_ts(graph, alerting, now))
+    s.listener = lambda agent, tool, params, cites: push(agent, tool, kind="read", tool=tool,
+                                                         services=[c.split(":", 1)[1] for c in cites if c.startswith("Service:")][:40])
     push("Lead", f"{len(alerting)} services alerting: {', '.join(alerting)}", kind="start", investigation=s.inv_id)
 
     rr = s.call("Lead", "rank_root_causes", {"alerting": alerting})

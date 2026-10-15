@@ -2,7 +2,8 @@ export type Node = { id: string; layer: string; tier: number | string; monitored
 export type Edge = { source: string; target: string; kind: "sync" | "async" };
 export type GraphData = { nodes: Node[]; edges: Edge[]; alerting: string[] };
 export type Hyp = { id: string; service: string; score: number; coverage: number; precision: number; summary: string };
-export type Finding = { id: string; agent: string; kind: string; text: string; effect: "supports" | "weakens" | string };
+export type Receipt = { graph_version: string; calls: { tool: string; params: Record<string, unknown> }[]; nodes_read: string[] };
+export type Finding = { id: string; agent: string; kind: string; text: string; effect: "supports" | "weakens" | string; receipt?: Receipt | null };
 export type BoardRow = { hypothesis_id: string; rank: number; service: string; structural_score: number; findings: Finding[] };
 export type Verification = { action: string; service: string; cleared: string[]; remaining: string[]; all_clear: boolean; summary: string };
 export type Result = {
@@ -10,6 +11,8 @@ export type Result = {
   claims: { verified: number; rejected: number }; board: BoardRow[]; verification: Verification | null;
   message: string; duration_s: number; alerting: string[]; blames_deploy: string | null;
   actions: { action: string; service: string; deploy_id?: string; rationale: string }[];
+  impact?: { arr: number; features: string[]; customers: number; failing: number } | null;
+  people?: { pick: { name: string; awake: boolean; local_time: string }[]; channel: string } | null;
 };
 export type Ev = { type: string; agent: string; text: string; t?: number; replay?: boolean;
-  hypotheses?: Hyp[]; verification?: Verification; result?: Result };
+  hypotheses?: Hyp[]; verification?: Verification; result?: Result; tool?: string; services?: string[] };
