@@ -70,7 +70,20 @@ def run_docs_llm(spec, client=None):
     return o.truth, run_docs_agent(world, o, NOW, client=client)
 
 
-CONDITIONS = {"graph-rules": run_graph_rules, "graph-llm": run_graph_llm, "docs-llm": run_docs_llm}
+def run_graph_coverage_only(spec):
+    """Ablation C: the same graph tools and rule policy, but the ranker scores candidates by coverage alone (no precision / F1).
+    It separates "walking the graph" from "our scoring formula". Tool-level patch, bench only; runs are sequential."""
+    from functools import partial
+    from backend.tools import registry
+    orig = registry.TOOLS["rank_root_causes"]["fn"]
+    registry.TOOLS["rank_root_causes"]["fn"] = partial(orig, mode="coverage")
+    try:
+        return run_graph_rules(spec)
+    finally:
+        registry.TOOLS["rank_root_causes"]["fn"] = orig
+
+
+CONDITIONS = {"graph-rules": run_graph_rules, "graph-coverage-only": run_graph_coverage_only, "graph-llm": run_graph_llm, "docs-llm": run_docs_llm}
 
 
 def main(argv=None):

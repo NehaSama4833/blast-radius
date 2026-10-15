@@ -103,3 +103,31 @@ def test_dev_scenarios_true_cause_is_top1(spec):
         assert top[0]["candidate"] == spec["roots"][0], [(c["candidate"], c["score"]) for c in top]
     finally:
         drop_graph(name)
+
+
+def dev_graph(spec_id):
+    spec = next(s for s in load_specs("dev") if s["id"] == spec_id)
+    w, o = materialize(spec)
+    drop_graph("t_split")
+    g = get_graph("t_split")
+    load_world(g, w, now=NOW)
+    return g, o
+
+
+def test_split_causes_pure_function():
+    from backend.tools.ranking import split_causes
+    meta = {c: dict(monitored=True, layer="core") for c in "abc"}
+    explains = {"a": {"1", "2", "3"}, "b": {"4", "5", "6"}, "c": {"1", "4"}}
+    predicts = {"a": {"1", "2", "3"}, "b": {"4", "5", "6"}, "c": {"1", "4", "7", "8", "9", "10"}}
+    got = split_causes({"1", "2", "3", "4", "5", "6"}, explains, predicts, meta)
+    assert sorted(c["candidate"] for c in got) == ["a", "b"]
+    assert split_causes({"1", "2", "3", "4", "5", "6"}, {"c": explains["c"]}, predicts, meta) == []      # nothing precise enough: no split
+
+
+def test_dev_ambiguous_storm_offers_two_leads_and_single_cause_storms_do_not():
+    from backend.tools.ranking import rank_root_causes
+    g, o = dev_graph("dev-ambiguous-1")
+    d = rank_root_causes(g, o.alerting).data
+    assert len(d["cause_set"]) == 2 and "kafka" in [c["candidate"] for c in d["cause_set"]]
+    g2, o2 = dev_graph("dev-hard-2")
+    assert rank_root_causes(g2, o2.alerting).data["cause_set"] == []

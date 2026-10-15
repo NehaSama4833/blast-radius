@@ -97,3 +97,20 @@ def test_docs_only_baseline_with_fake_model():
     r = run_docs_agent(world, o, 1_800_000_000, client=Fake(), lead_model="m")
     assert r["root_cause"] == o.roots[0] and r["tokens"] == 30
     assert r["claims"]["rejected"] >= 1          # a citation to a doc it never opened is rejected
+
+
+def test_coverage_only_ablation_ranks_by_coverage_and_restores_the_ranker():
+    from backend.tools import registry
+    from backend.tools.ranking import score_candidates
+    before = registry.TOOLS["rank_root_causes"]["fn"]
+    meta = {"a": dict(monitored=True, layer="api"), "b": dict(monitored=False, layer="data")}
+    ex = {"a": {"x"}, "b": {"x", "y"}}
+    pr = {"a": {"x"}, "b": {"x", "y", "p", "q", "r", "s"}}
+    alerting = {"x", "y"}
+    assert score_candidates(alerting, ex, pr, meta)[0]["candidate"] == "a"                  # F1 punishes b's many silent predictions
+    assert score_candidates(alerting, ex, pr, meta, mode="coverage")[0]["candidate"] == "b"  # coverage alone just likes b
+    from bench.run import run_graph_coverage_only
+    from backend.world.scenarios import load_specs
+    truth, res = run_graph_coverage_only(load_specs("dev")[0])
+    assert res["root_cause"] is not None
+    assert registry.TOOLS["rank_root_causes"]["fn"] is before

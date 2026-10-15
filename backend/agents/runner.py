@@ -98,6 +98,10 @@ class RulePolicy:
         if multi:
             reasons = [f"No single service explains the storm well: best fit {top['candidate']} scores {top['score']} and leaves {len(top['unexplained'])} alert(s) unexplained ({', '.join(top['unexplained'])}).",
                        "Likely more than one cause, or missing monitoring data."]
+            cs = ctx["ranking"].get("cause_set") or []
+            if cs:
+                reasons.append("The alerts split cleanly into two groups: " + "; ".join(f"{c['candidate']} would explain {len(c['explains'])}" for c in cs)
+                               + ". Treat these as leads for two separate causes (the second may sit a layer below the service named).")
             reasons.append("What would settle it: check the unexplained services for their own recent changes and look for a second fault.")
             return dict(root_cause=None, confidence="low", reasons=reasons, cites=[f"Service:{top['candidate']}"], blames_deploy=None, best=None)
         kinds = set(best.get("support_kinds", []))
