@@ -26,3 +26,15 @@ Tests use the embedded `falkordblite` by default. To test against a real server 
 uvicorn backend.app.main:app --port 8000      # API
 cd frontend && npm install && npm run dev      # UI on http://localhost:5173 (proxies /api)
 ```
+
+## Windows note
+
+`falkordblite` (the embedded database) does not run on Windows, so on Windows use a FalkorDB server instead and set `FALKORDB_URL`:
+
+```powershell
+docker run -p 6379:6379 falkordb/falkordb        # needs Docker Desktop
+$env:FALKORDB_URL = "redis://localhost:6379"
+pytest backend/tests
+```
+
+No Docker? Create a free instance at FalkorDB Cloud and use its connection string as `FALKORDB_URL`.

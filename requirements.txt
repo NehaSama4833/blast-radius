@@ -1,5 +1,5 @@
 falkordb>=1.0
-falkordblite>=0.10
+falkordblite>=0.10; sys_platform != "win32"
 pytest>=8
 mcp>=2,<3
 fastapi>=0.110
