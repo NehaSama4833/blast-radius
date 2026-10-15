@@ -21,3 +21,7 @@ Project: Blast Radius for Graph Hacks (Oct 15 00:01 - Oct 18 23:59 IST; submit b
 4. Import a real system from docker-compose.yml (parse services, depends_on, networks -> Service nodes and DEPENDS_ON edges).
 Globex in the benchmark and explore_graph already exist.
 Each needs tests; clustering/Ripple must not change the frozen dev/test scenarios' expected answers without an explicit note in docs/ARCHITECTURE.md.
+
+## Oct 15 night: feature work closed
+Added: first-glance UI, what-if, late alert (Ripple) in UI, memory "again" moment, Ask the graph, bring-your-own docker-compose, README GIF. 121 tests.
+FROM NOW ON: no new features. Remaining = deploy (Sat, Neha's accounts), final benchmark (Sat night: graph-llm, docs-llm, graph-rules, graph-coverage-only on test split with --final, once), BENCHMARK.md/blog numbers, polish, video (Neha, Sun), submit by Sun 18:00 IST.
