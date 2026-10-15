@@ -3,7 +3,7 @@
 Project: Blast Radius for Graph Hacks (Oct 15 00:01 - Oct 18 23:59 IST; submit by Sun 18:00 IST). Owner: Neha. Full plan: docs/DESIGN.md. Plain-language tour: docs/ARCHITECTURE.md.
 
 ## State (update at the end of every run)
-- Built and tested (108 tests): world, failure model, scenarios (dev/test frozen), tools, ranking, board + citation check, memory, verify, sandboxes, MCP server, rule policy, Claude policy (fake-model tested only), API + SSE, React UI, benchmark harness (graph-rules / graph-llm / docs-llm), deploy files, docs skeletons.
+- Built and tested (117 tests): world, failure model, scenarios (dev/test frozen), tools, ranking, board + citation check, memory, verify, sandboxes, MCP server, rule policy, Claude policy (fake-model tested only), API + SSE, React UI, benchmark harness (graph-rules / graph-llm / docs-llm), deploy files, docs skeletons.
 - NOT done: real-API run (no key yet), re-recorded replay, final benchmark (Sat night, test split only with --final), BENCHMARK.md numbers, blog numbers, deployment (Neha's accounts Sat), submission.
 - Blockers on Neha: (1) Anthropic API key with spend limit; (2) repo must be added to the session's sources so `git push` works (403 until then; everything is committed locally and re-sent as a zip).
 

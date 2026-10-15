@@ -20,14 +20,15 @@ export default function App() {
   const [focus, setFocus] = useState<string | null>(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const start = useCallback(async (w: string) => {
-    setErr(""); setEvents([]); setResult(null); setFocus(null); setAlerting([]);
+    setErr(""); setEvents([]); setResult(null); setFocus(null); setAlerting([]); setLoading(true);
     try {
       const s = await newSandbox(w);
       setSbx(s.sandbox); setWorld(w);
       setGraph(await getGraph(s.sandbox));
-    } catch (e) { setErr((e as Error).message); }
+    } catch (e) { setErr((e as Error).message); } finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
@@ -57,22 +58,25 @@ export default function App() {
       <header>
         <h1>Blast Radius</h1>
         <label>World
-          <select value={world} onChange={e => start(e.target.value)}>{worlds.map(w => <option key={w}>{w}</option>)}</select>
+          <select aria-label="World" value={world} onChange={e => start(e.target.value)}>{worlds.map(w => <option key={w}>{w}</option>)}</select>
         </label>
         <div className="chaos">
-          <select value={svc} onChange={e => setSvc(e.target.value)}>
+          <select aria-label="Service to break" value={svc} onChange={e => setSvc(e.target.value)}>
             <option value="">break a service…</option>
             {graph?.nodes.map(n => <option key={n.id} value={n.id}>{n.id}{n.monitored ? "" : " (unmonitored)"}</option>)}
           </select>
-          <select value={kind} onChange={e => setKind(e.target.value)}>{kinds.map(k => <option key={k}>{k}</option>)}</select>
+          <select aria-label="Kind of change" value={kind} onChange={e => setKind(e.target.value)}>{kinds.map(k => <option key={k}>{k}</option>)}</select>
           <button disabled={!svc || busy} onClick={() => doChaos({ service: svc, change_kind: kind })}>Break it</button>
           <button disabled={busy || !sbx} onClick={() => doChaos({ surprise: true })}>Surprise me</button>
         </div>
-        <button className="go" disabled={busy || !alerting.length} onClick={doInvestigate}>Investigate {alerting.length ? `(${alerting.length} alerts)` : ""}</button>
+        <button className="go" disabled={busy || !alerting.length} onClick={doInvestigate}>{busy && events.length ? "Investigating…" : `Investigate ${alerting.length ? `(${alerting.length} alerts)` : ""}`}</button>
       </header>
-      {err && <div className="err">{err}</div>}
+      {err && <div className="err" role="alert">{err}</div>}
+      {events.some(e => e.replay) && <div className="notice" role="status">Showing a recorded replay: the live investigation limit for today was reached.</div>}
+      {loading && <div className="notice" role="status">Setting up your private copy of the company graph…</div>}
       <main>
         <section className="left">
+          {!graph && !loading && !err && <p className="hint">No graph loaded.</p>}
           <Graph data={graph} alerting={alerting} focus={focus} cleared={cleared} onPick={setFocus} />
           <div className="legend"><i className="d red" /> alerting <i className="d green" /> cleared by simulated fix <i className="d amber" /> suspect + what it takes down <i className="d hollow" /> unmonitored · dashed edge = async</div>
         </section>
