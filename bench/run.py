@@ -2,7 +2,7 @@
 
 SAFETY: the held-out TEST split is refused unless --final is given, so nobody (including me) tunes on it by accident.
 Condition "graph-rules" is condition A with the no-LLM rule policy (a floor, and a no-API-key sanity check).
-Conditions "graph-llm" and "docs-llm" (A and B with a real model) are added once the model key is available.
+Conditions "graph-llm" and "docs-llm" (A and B with a real model) need an API key; both use the same lead model.
 Memory write-back is NOT used here (the docs-only baseline has no memory, so the comparison stays fair).
 """
 import argparse
@@ -39,7 +39,38 @@ def run_graph_rules(spec):
         drop_graph(name)
 
 
-CONDITIONS = {"graph-rules": run_graph_rules}
+def _scenario_graph(spec):
+    world, o = materialize(spec)
+    name = "bench_" + spec["id"].replace("-", "_")
+    drop_graph(name)
+    g = get_graph(name)
+    load_world(g, world, now=NOW)
+    failure.apply_outcome(g, o, NOW)
+    return world, o, g, name
+
+
+def run_graph_llm(spec, client=None):
+    """Condition A with Claude (needs a key)."""
+    from backend.agents.llm_policy import LLMPolicy
+    world, o, g, name = _scenario_graph(spec)
+    try:
+        pol = LLMPolicy(client=client)
+        res = run_investigation(g, o.alerting, now=NOW, policy=pol)
+        res["tokens"] = sum(v["input"] + v["output"] for v in pol.usage.values())
+        res["cost_usd"] = pol.cost_usd()
+        return o.truth, res
+    finally:
+        drop_graph(name)
+
+
+def run_docs_llm(spec, client=None):
+    """Condition B: docs-only baseline (needs a key)."""
+    from bench.baseline import run_docs_agent
+    world, o = materialize(spec)
+    return o.truth, run_docs_agent(world, o, NOW, client=client)
+
+
+CONDITIONS = {"graph-rules": run_graph_rules, "graph-llm": run_graph_llm, "docs-llm": run_docs_llm}
 
 
 def main(argv=None):

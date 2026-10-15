@@ -139,9 +139,22 @@ One small interface over two kinds of provider: Anthropic's API or any OpenAI-st
 
 Honest note on the numbers: the rule-based policy was written while looking at the 10 dev scenarios, so its perfect dev score is a sanity check, not evidence. Only the one-time final run on the 20 test scenarios counts, and it will be reported whatever it shows. The with-a-real-model conditions (graph agents vs docs-only agent) are added once the key works.
 
+## 17. The Claude-backed agents (written, tested only with a fake model)
+
+`backend/agents/llm_policy.py` plugs into the same slots as the rule policy. Each specialist is a Claude (Haiku) loop that can only call its own tools, then writes findings as JSON. Safety rails, all enforced by our code, not by trusting the model:
+
+- A finding is stored only if every id it cites appeared in that agent's own tool results; otherwise it is thrown away and counted as rejected.
+- The numbers that feed the verdict and the Discord draft (impact, deploy, precedent, who to page) are read from the tool results, never from the model's words.
+- The Lead (Sonnet) must pick one of the hypotheses on the board or say undetermined. If the structural ranking says "likely more than one cause" the model is not asked: the answer is undetermined. "High" confidence is downgraded unless the fit is strong and a change lines up in time.
+- If a model step fails (bad JSON, API error) that step silently falls back to the rule policy and the audit trail says so.
+
+The docs-only baseline (`bench/baseline.py`) is the comparison: same facts as Markdown files, keyword search, same Lead model, no graph, no simulation, no memory.
+
+Everything here is tested with a scripted fake model. It has NOT been run against the real API yet (no key), so prompts will need tuning on the dev scenarios only. When an API key exists, the web API uses these agents automatically (set USE_RULES=1 to force the rule policy).
+
 ## Not built yet
 
-The model-backed agent policies for conditions A and B (need a working API key), and the UI.
+Real-model tuning on dev scenarios, re-recording the replay from a real run, the final benchmark on the held-out test split, BENCHMARK.md, the blog and demo script.
 
 ## Small differences from the design doc
 

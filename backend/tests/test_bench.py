@@ -76,3 +76,24 @@ def test_dev_run_end_to_end(tmp_path):
     out = tmp_path / "r.json"
     rep = bench_run.main(["--split", "dev", "--out", str(out)])
     assert out.exists() and rep["summary"]["all"]["n"] == 10 and rep["summary"]["all"]["invalid_citations"] == 0
+
+
+def test_docs_only_baseline_with_fake_model():
+    import json
+    from backend.agents.llm import Reply
+    from bench.baseline import run_docs_agent
+    from backend.world.scenarios import load_specs, materialize
+    spec = load_specs("dev")[0]
+    world, o = materialize(spec)
+
+    class Fake:
+        provider = "anthropic"
+
+        def complete(self, model, system, messages, tools=None, **kw):
+            if len(messages) == 1:
+                return Reply(tool_calls=[dict(id="1", name="search_docs", args=dict(query="deploy log " + o.roots[0]))], usage={"input": 10, "output": 5, "cache_read": 0})
+            return Reply(text=json.dumps(dict(root_cause=o.roots[0], confidence="medium", top3=[o.roots[0]], deploy_id=None,
+                                              cites=["deploys/log.md", "docs/never-opened.md"])), usage={"input": 10, "output": 5, "cache_read": 0})
+    r = run_docs_agent(world, o, 1_800_000_000, client=Fake(), lead_model="m")
+    assert r["root_cause"] == o.roots[0] and r["tokens"] == 30
+    assert r["claims"]["rejected"] >= 1          # a citation to a doc it never opened is rejected

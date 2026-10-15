@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from backend.actions.discord import post_incident
 from backend.agents.memory import record_resolution
 from backend.agents.runner import run_investigation
+from backend.agents.llm_policy import LLMPolicy
 from backend.app.limits import DailyCap, RateLimiter
 from backend.graph import sandbox
 from backend.graph.db import get_graph
@@ -163,6 +164,16 @@ def chaos(body: Chaos, req: Request):
     return dict(alerting=o.alerting, n_alerts=len(o.alerts))
 
 
+def make_policy():
+    """Claude-backed agents when a key is configured (and USE_RULES is not set); otherwise the deterministic rule policy."""
+    if os.environ.get("USE_RULES") or not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENROUTER_API_KEY")):
+        return None
+    try:
+        return LLMPolicy()
+    except Exception:
+        return None
+
+
 def _stream_events(events):
     for e in events:
         yield f"data: {json.dumps(e, default=str)}\n\n"
@@ -182,7 +193,7 @@ def investigate(body: Investigate, req: Request):
 
     def work():
         try:
-            run_investigation(g, alerting, now=now, emit=q.put)
+            run_investigation(g, alerting, now=now, emit=q.put, policy=make_policy())
         except Exception as e:                    # never leave the stream hanging
             q.put(dict(type="error", agent="Lead", text=f"investigation failed: {type(e).__name__}"))
         q.put(None)
