@@ -5,6 +5,7 @@ import queue
 import random
 import threading
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -26,7 +27,22 @@ REPLAY_FILE = Path(__file__).with_name("replay.json")
 WORLDS = tuple(CONFIGS)
 ACTIONS = ("rollback", "config", "scale", "hotfix", "restart")
 
-app = FastAPI(title="Blast Radius")
+def _cleanup_loop():
+    while True:
+        time.sleep(600)
+        try:
+            sandbox.cleanup_expired()
+        except Exception:
+            pass                                  # a failed sweep must never take the API down
+
+
+@asynccontextmanager
+async def lifespan(_app):
+    threading.Thread(target=_cleanup_loop, daemon=True).start()     # drops sandboxes older than their 2h life
+    yield
+
+
+app = FastAPI(title="Blast Radius", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=[o for o in os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(",") if o],
                    allow_methods=["GET", "POST"], allow_headers=["*"])
 

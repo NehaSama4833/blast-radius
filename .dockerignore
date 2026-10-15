@@ -1,0 +1,5 @@
+.git
+.venv
+frontend/node_modules
+frontend/dist
+bench/results

@@ -1,0 +1,15 @@
+# One command to run everything locally: docker compose up --build   (UI: run `cd frontend && npm run dev`)
+services:
+  falkordb:
+    image: falkordb/falkordb:latest
+    ports: ["6379:6379"]
+  api:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      FALKORDB_URL: redis://falkordb:6379
+      ALLOWED_ORIGINS: http://localhost:5173
+      DAILY_INVESTIGATION_CAP: "200"
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+    depends_on: [falkordb]

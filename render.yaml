@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: blast-radius-api
+    runtime: docker
+    healthCheckPath: /api/health
+    envVars:
+      - key: FALKORDB_URL
+        sync: false          # paste the FalkorDB Cloud connection string in the Render dashboard
+      - key: ALLOWED_ORIGINS
+        sync: false          # your Vercel URL, e.g. https://blast-radius.vercel.app
+      - key: DAILY_INVESTIGATION_CAP
+        value: "200"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: DISCORD_WEBHOOK_URL
+        sync: false

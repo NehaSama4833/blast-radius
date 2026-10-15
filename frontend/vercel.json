@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/api/:path*", "destination": "https://YOUR-RENDER-APP.onrender.com/api/:path*" }]
+}
