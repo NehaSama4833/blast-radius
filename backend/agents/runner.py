@@ -107,11 +107,11 @@ class RulePolicy:
         kinds = set(best.get("support_kinds", []))
         reasons = [f"{best['service']} explains {len(rank1['explains'])} of {ctx['n_alerting']} alerts and predicts {len(rank1['predicts'])} services; {len(rank1['predicted_not_alerting'])} predicted are not alerting."]
         cites = [f"Service:{best['service']}"]
-        if "temporal" in kinds:
+        if "temporal" in kinds and best.get("deploy"):           # a model may support "temporal" via a dependency's change; only a direct deploy is blamed
             c = best["deploy"]
             reasons.append(f"{c['kind']} deploy {c['deploy_id']} to it shipped {c['minutes_before']} min before the first alert.")
             cites.append(f"Deploy:{c['deploy_id']}")
-        if "historical" in kinds:
+        if "historical" in kinds and best.get("precedent"):
             p = best["precedent"]
             reasons.append(f"Same pattern as {p['incident']}, fixed by {p['action']} in {p['ttr']} min.")
             cites.append(f"Incident:{p['incident']}")
@@ -122,7 +122,7 @@ class RulePolicy:
         else:
             conf = "low"
         return dict(root_cause=best["service"], confidence=conf, reasons=reasons, cites=cites,
-                    blames_deploy=best["deploy"]["deploy_id"] if "temporal" in kinds else None, best=best)
+                    blames_deploy=best["deploy"]["deploy_id"] if "temporal" in kinds and best.get("deploy") else None, best=best)
 
 
 def _first_alert_ts(graph, alerting, now):

@@ -30,7 +30,7 @@ def test_anthropic_tool_loop_and_request_shape():
     assert usage == {"input": 250, "output": 25, "cache_read": 60}
     first, second = seen
     assert first["url"].endswith("/v1/messages") and first["headers"]["x-api-key"] == "sk-test"
-    assert first["body"]["system"][0]["cache_control"] == {"type": "ephemeral"} and first["body"]["temperature"] == 0.0
+    assert first["body"]["system"][0]["cache_control"] == {"type": "ephemeral"} and "temperature" not in first["body"]
     assert first["body"]["tools"][0]["input_schema"]["required"] == ["service"]
     assert second["body"]["messages"][-1]["content"][0] == {"type": "tool_result", "tool_use_id": "t1", "content": '{"ok":1}'}
 

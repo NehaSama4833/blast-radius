@@ -29,7 +29,7 @@ ROLE = {
 }
 RULES = """Rules:
 - Use only your tools for facts. Every finding must cite node ids exactly as they appear in the 'cite_ids' list of your tool results (like "Service:ledger-db" or "Deploy:d-12"). A finding citing anything else is rejected.
-- Be concise: one or two sentences per finding. Do not guess.
+- Be concise: one sentence (at most 30 words) per finding, and at most 3 cites per finding. Do not guess.
 - When done, reply with ONLY a JSON object: {"findings":[{"hypothesis_id":"...","supports":true|false,"text":"...","cites":["Label:key",...]}]}"""
 
 

@@ -75,9 +75,12 @@ class ChatClient:
                 msgs.append({"role": "assistant", "content": blocks})
             else:
                 msgs.append({"role": "user", "content": [{"type": "tool_result", "tool_use_id": r["id"], "content": r["content"]} for r in m["results"]]})
-        body = {"model": model, "max_tokens": max_tokens, "temperature": temperature, "messages": msgs,
+        # current Claude models reject `temperature` (deprecated), so it is only sent when ANTHROPIC_SEND_TEMPERATURE=1
+        body = {"model": model, "max_tokens": max_tokens, "messages": msgs,
                 # the system prompt is cached: it is identical on every call of an investigation
                 "system": [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]}
+        if os.environ.get("ANTHROPIC_SEND_TEMPERATURE") == "1" and temperature is not None:
+            body["temperature"] = temperature
         if tools:
             body["tools"] = [{"name": t["name"], "description": t["description"], "input_schema": t["input_schema"]} for t in tools]
         return body
@@ -137,13 +140,13 @@ def model_for(role: str, provider: str) -> str:
     raise LLMError(f"set {'LEAD_MODEL' if role == 'lead' else 'AGENT_MODEL'} (a model id from your provider)")
 
 
-def run_tool_loop(client, model, system, user_text, tools, execute, max_steps=8, max_output_tokens=4000, temperature=0.0):
+def run_tool_loop(client, model, system, user_text, tools, execute, max_steps=8, max_output_tokens=4000, temperature=0.0, max_tokens_per_call=2048):
     """Let a model call tools until it answers. `execute(name, args) -> str` runs a tool (the caller enforces scoping).
     Budgets: at most `max_steps` model calls and `max_output_tokens` total output tokens. Returns (final_text, usage, steps)."""
     messages = [{"role": "user", "text": user_text}]
     usage = {"input": 0, "output": 0, "cache_read": 0}
     for step in range(1, max_steps + 1):
-        rep = client.complete(model, system, messages, tools, max_tokens=1024, temperature=temperature)
+        rep = client.complete(model, system, messages, tools, max_tokens=max_tokens_per_call, temperature=temperature)
         for k in usage:
             usage[k] += rep.usage.get(k, 0)
         if not rep.tool_calls:
