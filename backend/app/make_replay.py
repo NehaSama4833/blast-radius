@@ -17,7 +17,8 @@ if __name__ == "__main__":
     load_world(g, world, now=now)
     failure.apply_outcome(g, o, now)
     events = []
-    run_investigation(g, o.alerting, now=now, emit=events.append)
+    from backend.app.main import make_policy
+    run_investigation(g, o.alerting, now=now, emit=events.append, policy=make_policy())   # Claude when a key is set, rules otherwise
     REPLAY_FILE.write_text(json.dumps(events, indent=1, default=str))
     drop_graph("replay_tmp")
     print(len(events), "events")

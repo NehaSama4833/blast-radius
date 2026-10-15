@@ -3,7 +3,7 @@
   "type": "start",
   "agent": "Lead",
   "text": "11 services alerting: audit-svc, billing-svc, kyc-svc, ledger-svc, mobile-bff, partner-api, payments-api, payouts-api, refunds-api, reporting-svc, web-gateway",
-  "t": 0.01,
+  "t": 0.0,
   "investigation": "inv-1"
  },
  {
@@ -41,128 +41,98 @@
  {
   "type": "step",
   "agent": "Changes",
-  "text": "recent_changes(ledger-db): 1 deploys in the 2h before the first alert, 1 on it directly",
-  "t": 0.03
+  "text": "2 model step(s), 3 tool call(s)",
+  "t": 4.7
+ },
+ {
+  "type": "finding",
+  "agent": "Changes",
+  "text": "supports ledger-db",
+  "t": 4.71
+ },
+ {
+  "type": "finding",
+  "agent": "Changes",
+  "text": "weakens ledger-svc",
+  "t": 4.71
+ },
+ {
+  "type": "finding",
+  "agent": "Changes",
+  "text": "weakens fx-rates",
+  "t": 4.71
  },
  {
   "type": "step",
   "agent": "Impact",
-  "text": "blast_radius(ledger-db): 11 services failing, features ['Checkout', 'Invoicing', 'Payouts', 'Refunds', 'Reporting'], ARR at risk 5,983,000",
-  "t": 0.03
- },
- {
-  "type": "step",
-  "agent": "History",
-  "text": "similar_incidents/lessons_for(ledger-db): 3 past incidents on it, 1 lessons",
-  "t": 0.04
- },
- {
-  "type": "step",
-  "agent": "People",
-  "text": "find_experts(ledger-db): 3 people, 2 awake now",
-  "t": 0.04
- },
- {
-  "type": "finding",
-  "agent": "History",
-  "text": "supports ledger-db: INC-124",
-  "t": 0.04
- },
- {
-  "type": "finding",
-  "agent": "Changes",
-  "text": "supports ledger-db: d-477 (infra) 56 min before",
-  "t": 0.05
- },
- {
-  "type": "step",
-  "agent": "Changes",
-  "text": "recent_changes(ledger-svc): 1 deploys in the 2h before the first alert, 0 on it directly",
-  "t": 0.05
+  "text": "2 model step(s), 3 tool call(s)",
+  "t": 6.78
  },
  {
   "type": "finding",
   "agent": "Impact",
   "text": "weakens ledger-db",
-  "t": 0.05
- },
- {
-  "type": "step",
-  "agent": "History",
-  "text": "similar_incidents/lessons_for(ledger-svc): 0 past incidents on it, 0 lessons",
-  "t": 0.05
- },
- {
-  "type": "finding",
-  "agent": "Changes",
-  "text": "weakens ledger-svc: no direct change",
-  "t": 0.05
- },
- {
-  "type": "finding",
-  "agent": "People",
-  "text": "Noah Becker, Meera Iyer",
-  "t": 0.05
- },
- {
-  "type": "step",
-  "agent": "Changes",
-  "text": "recent_changes(fx-rates): 0 deploys in the 2h before the first alert, 0 on it directly",
-  "t": 0.05
- },
- {
-  "type": "step",
-  "agent": "Impact",
-  "text": "blast_radius(ledger-svc): 8 services failing, features ['Checkout', 'Invoicing', 'Payouts', 'Refunds'], ARR at risk 5,915,000",
-  "t": 0.05
- },
- {
-  "type": "step",
-  "agent": "History",
-  "text": "similar_incidents/lessons_for(fx-rates): 1 past incidents on it, 0 lessons",
-  "t": 0.05
- },
- {
-  "type": "finding",
-  "agent": "Changes",
-  "text": "weakens fx-rates: no direct change",
-  "t": 0.06
- },
- {
-  "type": "finding",
-  "agent": "History",
-  "text": "supports fx-rates: INC-121",
-  "t": 0.06
+  "t": 6.78
  },
  {
   "type": "finding",
   "agent": "Impact",
   "text": "weakens ledger-svc",
-  "t": 0.06
- },
- {
-  "type": "step",
-  "agent": "Impact",
-  "text": "blast_radius(fx-rates): 9 services failing, features ['Checkout', 'Invoicing', 'Payouts', 'Refunds'], ARR at risk 5,915,000",
-  "t": 0.06
+  "t": 6.78
  },
  {
   "type": "finding",
   "agent": "Impact",
   "text": "weakens fx-rates",
-  "t": 0.06
+  "t": 6.79
+ },
+ {
+  "type": "step",
+  "agent": "People",
+  "text": "5 model step(s), 4 tool call(s)",
+  "t": 10.91
+ },
+ {
+  "type": "finding",
+  "agent": "People",
+  "text": "supports ledger-db",
+  "t": 10.91
+ },
+ {
+  "type": "step",
+  "agent": "History",
+  "text": "4 model step(s), 8 tool call(s)",
+  "t": 11.89
+ },
+ {
+  "type": "finding",
+  "agent": "History",
+  "text": "supports ledger-db",
+  "t": 11.9
+ },
+ {
+  "type": "finding",
+  "agent": "History",
+  "text": "weakens ledger-svc",
+  "t": 11.9
+ },
+ {
+  "type": "finding",
+  "agent": "History",
+  "text": "supports fx-rates",
+  "t": 11.9
  },
  {
   "type": "step",
   "agent": "Lead",
-  "text": "Read the board from the graph: ledger-db: 4 findings; ledger-svc: 2 findings; fx-rates: 3 findings",
-  "t": 0.06
+  "text": "Read the board from the graph: ledger-db: 4 findings; ledger-svc: 3 findings; fx-rates: 3 findings",
+  "t": 11.9
  },
  {
   "type": "verify",
   "agent": "Lead",
   "text": "rollback on ledger-db clears 10 of 11 alerts; still unexplained: kyc-svc. (Simulation against the dependency graph.)",
-  "t": 0.18,
+  "t": 14.29,
   "verification": {
    "action": "rollback",
    "service": "ledger-db",
@@ -192,34 +162,36 @@
  {
   "type": "decision",
   "agent": "Lead",
-  "text": "Decision: ledger-db (high confidence). ledger-db explains 10 of 11 alerts and predicts 11 services; 1 predicted are not alerting. infra deploy d-477 to it shipped 56 min before the first alert. Same pattern as INC-124, fixed by rollback in 8 min.",
-  "t": 0.19,
+  "text": "Decision: ledger-db (medium confidence). ledger-db explains 10 of 11 alerts and predicts 11 services. ledger-db had infra deploy d-477 about 56 minutes before the first alert, and four past ledger-db incidents showed the same pattern of 5xx errors across the payments cluster. ledger-svc and fx-rates are weakened: ledger-svc has no change of its own and an incomplete blast radius, and fx-rates has no recent change and predicts alerts that are absent. kyc-svc is not in ledger-db's blast radius, so one alert is unexplained. Also, the deploy was an instance type migration, while the past incidents were pool config changes.",
+  "t": 14.29,
   "decision": {
    "root_cause": "ledger-db",
-   "confidence": "high",
+   "confidence": "medium",
    "reasons": [
-    "ledger-db explains 10 of 11 alerts and predicts 11 services; 1 predicted are not alerting.",
-    "infra deploy d-477 to it shipped 56 min before the first alert.",
-    "Same pattern as INC-124, fixed by rollback in 8 min."
+    "ledger-db explains 10 of 11 alerts and predicts 11 services.",
+    "ledger-db had infra deploy d-477 about 56 minutes before the first alert, and four past ledger-db incidents showed the same pattern of 5xx errors across the payments cluster.",
+    "ledger-svc and fx-rates are weakened: ledger-svc has no change of its own and an incomplete blast radius, and fx-rates has no recent change and predicts alerts that are absent.",
+    "kyc-svc is not in ledger-db's blast radius, so one alert is unexplained. Also, the deploy was an instance type migration, while the past incidents were pool config changes."
    ]
   }
  },
  {
   "type": "done",
   "agent": "Lead",
-  "text": "Done in 0.19 s. Claims verified: 11/11",
-  "t": 0.19,
+  "text": "Done in 14.3 s. Claims verified: 12/12",
+  "t": 14.3,
   "result": {
    "investigation": "inv-1",
    "root_cause": "ledger-db",
-   "confidence": "high",
+   "confidence": "medium",
    "reasons": [
-    "ledger-db explains 10 of 11 alerts and predicts 11 services; 1 predicted are not alerting.",
-    "infra deploy d-477 to it shipped 56 min before the first alert.",
-    "Same pattern as INC-124, fixed by rollback in 8 min."
+    "ledger-db explains 10 of 11 alerts and predicts 11 services.",
+    "ledger-db had infra deploy d-477 about 56 minutes before the first alert, and four past ledger-db incidents showed the same pattern of 5xx errors across the payments cluster.",
+    "ledger-svc and fx-rates are weakened: ledger-svc has no change of its own and an incomplete blast radius, and fx-rates has no recent change and predicts alerts that are absent.",
+    "kyc-svc is not in ledger-db's blast radius, so one alert is unexplained. Also, the deploy was an instance type migration, while the past incidents were pool config changes."
    ],
    "claims": {
-    "verified": 11,
+    "verified": 12,
     "rejected": 0
    },
    "hypotheses": [
@@ -231,13 +203,6 @@
      "coverage": 0.9091,
      "precision": 0.9091,
      "summary": "ledger-db explains 10 of 11 alerts. If it failed, 11 monitored services should alert; 10 do (not alerting: settlement-svc). It does not explain: kyc-svc. ledger-db has no monitoring, so it would fail silently.",
-     "precedent": {
-      "incident": "INC-124",
-      "action": "rollback",
-      "ttr": 8,
-      "fix": "Roll back the ledger-db connection pool config deploy",
-      "times_seen": 4
-     },
      "deploy": {
       "deploy_id": "d-477",
       "ts": 1799996142,
@@ -297,6 +262,38 @@
       ],
       "channel": "#ledger-oncall"
      },
+     "_inc": {
+      "incident_id": "INC-124",
+      "title": "ledger-db connection pool exhausted",
+      "summary": "Config change to ledger-db connection pool (max_connections) caused pool exhaustion; 5xx errors across the payments cluster. Fixed by rolling back the config deploy.",
+      "root_cause_service": "ledger-db",
+      "action": "rollback",
+      "ttr_min": 8,
+      "started_at": 1798705425,
+      "resolution": "Roll back the ledger-db connection pool config deploy. Resolved in 8 minutes.",
+      "why": [
+       "same root-cause service"
+      ],
+      "score": 3.0
+     },
+     "_lessons": [
+      {
+       "pattern": "ledger-db connection pool exhausted",
+       "fix": "Roll back the ledger-db connection pool config deploy",
+       "times_seen": 4,
+       "last_seen": 1798705425,
+       "avg_ttr_min": 7.5,
+       "about": "ledger-db",
+       "hops": 0
+      }
+     ],
+     "precedent": {
+      "incident": "INC-124",
+      "action": "rollback",
+      "ttr": 8,
+      "fix": "Roll back the ledger-db connection pool config deploy",
+      "times_seen": 4
+     },
      "support_kinds": [
       "historical",
       "people",
@@ -328,6 +325,7 @@
        "free": 6
       }
      },
+     "_lessons": [],
      "support_kinds": []
     },
     {
@@ -338,13 +336,6 @@
      "coverage": 0.6364,
      "precision": 0.7,
      "summary": "fx-rates explains 7 of 11 alerts. If it failed, 10 monitored services should alert; 7 do (not alerting: fx-rates, orders-api, pricing-svc). It does not explain: audit-svc, kyc-svc, ledger-svc, reporting-svc.",
-     "precedent": {
-      "incident": "INC-121",
-      "action": "restart",
-      "ttr": 20,
-      "fix": "Restart fx-rates. Resolved in 20 minutes.",
-      "times_seen": 1
-     },
      "impact": {
       "arr": 5915000,
       "features": [
@@ -362,6 +353,28 @@
        "free": 6
       }
      },
+     "_inc": {
+      "incident_id": "INC-121",
+      "title": "fx-rates degraded after infra change",
+      "summary": "A infra change to fx-rates degraded dependent services; errors and latency rose. Fixed by restarting fx-rates.",
+      "root_cause_service": "fx-rates",
+      "action": "restart",
+      "ttr_min": 20,
+      "started_at": 1798225760,
+      "resolution": "Restart fx-rates. Resolved in 20 minutes.",
+      "why": [
+       "same root-cause service"
+      ],
+      "score": 3.0
+     },
+     "_lessons": [],
+     "precedent": {
+      "incident": "INC-121",
+      "action": "restart",
+      "ttr": 20,
+      "fix": "Restart fx-rates. Resolved in 20 minutes.",
+      "times_seen": 1
+     },
      "support_kinds": [
       "historical"
      ]
@@ -377,34 +390,34 @@
      "findings": [
       {
        "id": "f-inv-1-1",
-       "agent": "Impact",
-       "kind": "impact",
-       "text": "If ledger-db failed: 11 services fail now and 0 are at risk soon (async); features hit: Checkout, Invoicing, Payouts, Refunds, Reporting; 24 customers, ARR at risk 5,983,000. Some current alerts are OUTSIDE that blast radius.",
-       "weight": 1.0,
-       "effect": "weakens"
-      },
-      {
-       "id": "f-inv-1-2",
        "agent": "Changes",
        "kind": "temporal",
-       "text": "infra deploy d-477 to ledger-db ('Migrate ledger-db to new instance type') shipped 56 min before the first alert, by noah.",
-       "weight": 1.0,
-       "effect": "supports"
-      },
-      {
-       "id": "f-inv-1-3",
-       "agent": "History",
-       "kind": "historical",
-       "text": "Same pattern as INC-124 (ledger-db connection pool exhausted), fixed by rollback in 8 min.",
+       "text": "ledger-db had infra deploy d-477 (instance type migration by noah) about 56 minutes before the first alert, a direct change just before the alert.",
        "weight": 1.0,
        "effect": "supports"
       },
       {
        "id": "f-inv-1-4",
+       "agent": "Impact",
+       "kind": "impact",
+       "text": "ledger-db's sync blast radius covers 10 alerting services but not kyc-svc, so it does not account for every alert and is weakened.",
+       "weight": 1.0,
+       "effect": "weakens"
+      },
+      {
+       "id": "f-inv-1-7",
        "agent": "People",
        "kind": "people",
-       "text": "Page Noah Becker (on-call; owning team; resolved 3 past incidents on ledger-db; shipped 1 of the last 3 deploys to ledger-db; local 09:00, awake) and Meera Iyer (owning team; resolved 4 past incidents on ledger-db; shipped 1 of the last 3 deploys to ledger-db; local 13:30, awake); channel #ledger-oncall.",
+       "text": "Page Noah Becker (on-call, resolved 3 ledger-db incidents) and Meera Iyer (resolved 4), both awake at the query time; Chris Walker is asleep.",
        "weight": 0.5,
+       "effect": "supports"
+      },
+      {
+       "id": "f-inv-1-8",
+       "agent": "History",
+       "kind": "historical",
+       "text": "Four past ledger-db incidents were connection-pool exhaustion from a config change, causing 5xx errors across the payments cluster; rollback resolved each in 5-9 minutes.",
+       "weight": 1.0,
        "effect": "supports"
       }
      ]
@@ -417,18 +430,26 @@
      "status": "open",
      "findings": [
       {
-       "id": "f-inv-1-5",
+       "id": "f-inv-1-2",
        "agent": "Changes",
        "kind": "temporal",
-       "text": "No deploy to ledger-svc in the 2 hours before the first alert (1 on its dependencies).",
+       "text": "No change to ledger-svc itself appears before the alert; the only nearby change is upstream ledger-db deploy d-477, one hop away.",
        "weight": 1.0,
        "effect": "weakens"
       },
       {
-       "id": "f-inv-1-7",
+       "id": "f-inv-1-5",
        "agent": "Impact",
        "kind": "impact",
-       "text": "If ledger-svc failed: 8 services fail now and 0 are at risk soon (async); features hit: Checkout, Invoicing, Payouts, Refunds; 23 customers, ARR at risk 5,915,000. Some current alerts are OUTSIDE that blast radius.",
+       "text": "ledger-svc's sync blast radius covers billing, payments, payouts, refunds, mobile-bff, partner-api and web-gateway, but not audit-svc, kyc-svc or reporting-svc, so it is weakened.",
+       "weight": 1.0,
+       "effect": "weakens"
+      },
+      {
+       "id": "f-inv-1-9",
+       "agent": "History",
+       "kind": "historical",
+       "text": "History shows ledger-svc only as an affected service, not a root cause; the matching ledger-db incidents trace to ledger-db's pool config, not ledger-svc.",
        "weight": 1.0,
        "effect": "weakens"
       }
@@ -442,26 +463,26 @@
      "status": "open",
      "findings": [
       {
-       "id": "f-inv-1-6",
-       "agent": "Changes",
-       "kind": "temporal",
-       "text": "No deploy to fx-rates in the 2 hours before the first alert.",
-       "weight": 1.0,
-       "effect": "weakens"
-      },
-      {
-       "id": "f-inv-1-8",
+       "id": "f-inv-1-10",
        "agent": "History",
        "kind": "historical",
-       "text": "Same pattern as INC-121 (fx-rates degraded after infra change), fixed by restart in 20 min.",
+       "text": "INC-121 was an fx-rates infra change that degraded dependent services with rising errors and latency, fixed by restarting fx-rates in 20 minutes.",
        "weight": 1.0,
        "effect": "supports"
       },
       {
-       "id": "f-inv-1-9",
+       "id": "f-inv-1-3",
+       "agent": "Changes",
+       "kind": "temporal",
+       "text": "No deploys or config changes to fx-rates in the 120 minutes before the first alert.",
+       "weight": 1.0,
+       "effect": "weakens"
+      },
+      {
+       "id": "f-inv-1-6",
        "agent": "Impact",
        "kind": "impact",
-       "text": "If fx-rates failed: 9 services fail now and 0 are at risk soon (async); features hit: Checkout, Invoicing, Payouts, Refunds; 23 customers, ARR at risk 5,915,000. Some current alerts are OUTSIDE that blast radius.",
+       "text": "fx-rates' blast radius misses audit-svc, kyc-svc, ledger-svc and reporting-svc, and predicts orders-api and pricing-svc alerts that are absent, so it is weakened.",
        "weight": 1.0,
        "effect": "weakens"
       }
@@ -559,8 +580,8 @@
     "fix": "Roll back the ledger-db connection pool config deploy",
     "times_seen": 4
    },
-   "message": "[INCIDENT] 11 services alerting. Likely root cause: ledger-db (high confidence).\nledger-db explains 10 of 11 alerts and predicts 11 services; 1 predicted are not alerting.\ninfra deploy d-477 to it shipped 56 min before the first alert.\nSame pattern as INC-124, fixed by rollback in 8 min.\nImpact: features Checkout, Invoicing, Payouts, Refunds, Reporting; 24 customers; ARR at risk 5,983,000.\nProposed action: rollback on ledger-db (deploy d-477) - needs human approval.\nPage: Noah Becker (awake), Meera Iyer (awake) in #ledger-oncall.",
-   "duration_s": 0.19,
+   "message": "[INCIDENT] 11 services alerting. Likely root cause: ledger-db (medium confidence).\nledger-db explains 10 of 11 alerts and predicts 11 services.\nledger-db had infra deploy d-477 about 56 minutes before the first alert, and four past ledger-db incidents showed the same pattern of 5xx errors across the payments cluster.\nledger-svc and fx-rates are weakened: ledger-svc has no change of its own and an incomplete blast radius, and fx-rates has no recent change and predicts alerts that are absent.\nkyc-svc is not in ledger-db's blast radius, so one alert is unexplained. Also, the deploy was an instance type migration, while the past incidents were pool config changes.\nImpact: features Checkout, Invoicing, Payouts, Refunds, Reporting; 24 customers; ARR at risk 5,983,000.\nProposed action: rollback on ledger-db (deploy d-477) - needs human approval.\nPage: Noah Becker (awake), Meera Iyer (awake) in #ledger-oncall.",
+   "duration_s": 14.3,
    "alerting": [
     "audit-svc",
     "billing-svc",

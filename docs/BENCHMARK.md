@@ -29,5 +29,15 @@ _Not run yet._ Dev-only sanity check with the rule policy (written while looking
 | B docs-llm | TBD | TBD | TBD | TBD | TBD | TBD |
 | graph-rules (floor) | TBD | TBD | TBD | TBD | TBD | $0 |
 
+## Dev-split results with the real model (Oct 15; practice scenarios only, NOT the evidence)
+Prompts were still being fixed during this run, so treat it as a smoke test.
+
+| Condition | Top-1 (9 single-cause) | Deploy found | Ambiguous abstained | Invalid citations | Avg cost / investigation |
+|---|---|---|---|---|---|
+| A graph-llm (Sonnet 5.5 lead, Haiku 5.5 specialists) | 9/9 | 9/9 | 1/1 | 0 | about $0.008 |
+| B docs-llm (Sonnet 5.5, BM25 docs) | 9/9 | 9/9 | 1/1 | 0 | about $0.068 |
+
+What this says honestly: on the dev scenarios the docs-only baseline is just as accurate. The graph version was about 8x cheaper and every claim cites graph nodes, but accuracy did not separate the two here. Only the held-out test split (more hard cases) can say more, and we will report it whichever way it goes. We will not change scenarios after seeing this.
+
 ## Limits to state plainly
 Synthetic data we generated ourselves; 20 test scenarios is a small sample; the failure model and the graph tools share assumptions about how failures propagate, which favours the graph condition; one model family.
