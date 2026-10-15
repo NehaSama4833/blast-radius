@@ -9,3 +9,14 @@ dist/
 *.db
 .DS_Store
 bench/results/
+
+# secrets: never commit keys or local env files
+.env
+.env.*
+!.env.example
+*.env
+.secrets/
+*.pem
+*.key
+secrets.json
+credentials.json
