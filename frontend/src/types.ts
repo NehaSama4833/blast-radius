@@ -12,7 +12,9 @@ export type Result = {
   message: string; duration_s: number; alerting: string[]; blames_deploy: string | null;
   actions: { action: string; service: string; deploy_id?: string; rationale: string }[];
   impact?: { arr: number; features: string[]; customers: number; failing: number } | null;
+  ripple?: { new_alerts: string[]; retired: number; kept: number; reran: string[]; new_hypotheses: string[] };
+  precedent?: { incident: string; action: string; ttr: number; times_seen: number } | null;
   people?: { pick: { name: string; awake: boolean; local_time: string }[]; channel: string } | null;
 };
 export type Ev = { type: string; agent: string; text: string; t?: number; replay?: boolean;
-  hypotheses?: Hyp[]; verification?: Verification; result?: Result; tool?: string; services?: string[] };
+  hypotheses?: Hyp[]; verification?: Verification; result?: Result; tool?: string; services?: string[]; ripple?: boolean };

@@ -126,7 +126,7 @@ class RulePolicy:
 
 
 def _first_alert_ts(graph, alerting, now):
-    r = graph.query("UNWIND $a AS n MATCH (x:Alert)-[:ON]->(:Service {name:n}) WHERE x.ts <= $now RETURN min(x.ts)", {"a": alerting, "now": now}).result_set
+    r = graph.query("UNWIND $a AS n MATCH (x:Alert)-[:ON]->(:Service {name:n}) WHERE x.ts <= $now AND x.resolved IS NULL RETURN min(x.ts)", {"a": alerting, "now": now}).result_set
     return r[0][0] if r and r[0][0] else now
 
 

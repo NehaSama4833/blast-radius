@@ -9,15 +9,20 @@ const post = (u: string, b: unknown) => fetch(u, { method: "POST", headers: { "c
 export const getWorlds = () => fetch("/api/worlds").then(j<{ worlds: { name: string; services: number }[]; actions: string[]; change_kinds: string[] }>);
 export const newSandbox = (world: string) => post("/api/sandbox", { world }).then(j<{ sandbox: string; world: string }>);
 export const getGraph = (s: string) => fetch(`/api/graph/${s}`).then(j<GraphData>);
-export const chaos = (sandbox: string, o: { service?: string; change_kind?: string; surprise?: boolean }) =>
+export const chaos = (sandbox: string, o: { service?: string; change_kind?: string; surprise?: boolean; again?: boolean }) =>
   post("/api/chaos", { sandbox, ...o }).then(j<{ alerting: string[]; n_alerts: number }>);
 export const resolve = (sandbox: string, investigation: string, action: string, ttr_min: number) =>
   post("/api/resolve", { sandbox, investigation, action, ttr_min }).then(j<Record<string, unknown>>);
 export const postToDiscord = (sandbox: string, investigation: string) => post("/api/post", { sandbox, investigation }).then(j<Record<string, unknown>>);
 
-/** Reads the server-sent-event stream from POST /api/investigate. */
-export async function investigate(sandbox: string, onEvent: (e: Ev) => void) {
-  const r = await post("/api/investigate", { sandbox });
+export type WhatIfData = { service: string; failing_now: string[]; at_risk: string[]; features: string[]; customers: number; arr: number };
+export const whatIf = (sandbox: string, service: string) => post("/api/whatif", { sandbox, service }).then(j<WhatIfData>);
+export const investigate = (sandbox: string, onEvent: (e: Ev) => void) => stream("/api/investigate", sandbox, onEvent);
+export const lateAlert = (sandbox: string, onEvent: (e: Ev) => void) => stream("/api/late", sandbox, onEvent);
+
+/** Reads a server-sent-event stream from a POST endpoint. */
+async function stream(url: string, sandbox: string, onEvent: (e: Ev) => void) {
+  const r = await post(url, { sandbox });
   if (!r.ok || !r.body) throw new Error((await r.json().catch(() => ({ detail: "failed" }))).detail);
   const reader = r.body.getReader(), dec = new TextDecoder();
   let buf = "";

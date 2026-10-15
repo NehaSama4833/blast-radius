@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { chaos, getGraph, getWorlds, investigate, newSandbox } from "./api";
+import { chaos, getGraph, getWorlds, investigate, lateAlert, newSandbox, whatIf } from "./api";
+import type { WhatIfData } from "./api";
 import Graph from "./Graph";
 import Lanes from "./Lanes";
 import Board from "./Board";
@@ -29,8 +30,11 @@ export default function App() {
   const [running, setRunning] = useState(false);
   const [loading, setLoading] = useState(true);
   const queue = useRef<Ev[]>([]);
+  const [learned, setLearned] = useState<string[]>([]);
+  const [resolved, setResolved] = useState(false);
+  const [wi, setWi] = useState<WhatIfData | null>(null);
 
-  const reset = () => { queue.current = []; setEvents([]); setResult(null); setFocus(null); setProof([]); };
+  const reset = () => { queue.current = []; setEvents([]); setResult(null); setFocus(null); setProof([]); setWi(null); };
 
   const start = useCallback(async (w: string) => {
     setErr(""); queue.current = []; setEvents([]); setResult(null); setFocus(null); setProof([]); setAlerting([]); setLoading(true);
@@ -67,8 +71,8 @@ export default function App() {
     return m;
   }, [events, running]);
 
-  const doChaos = async (o: { service?: string; change_kind?: string; surprise?: boolean }) => {
-    setErr(""); setBusy(true); reset();
+  const doChaos = async (o: { service?: string; change_kind?: string; surprise?: boolean; again?: boolean }) => {
+    setErr(""); setBusy(true); reset(); setResolved(false);
     try { setAlerting((await chaos(sbx, o)).alerting); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
   const doInvestigate = async () => {
@@ -76,6 +80,18 @@ export default function App() {
     try { await investigate(sbx, e => { queue.current.push(e); }); }
     catch (e) { setErr((e as Error).message); setRunning(false); }
     finally { setBusy(false); }
+  };
+
+  const doLate = async () => {
+    setErr(""); setBusy(true); reset(); setRunning(true);
+    try { await lateAlert(sbx, e => { queue.current.push(e); if (e.type === "start") setAlerting(a => a); }); }
+    catch (e) { setErr((e as Error).message); setRunning(false); }
+    finally { setBusy(false); setAlerting((await getGraph(sbx)).alerting); }
+  };
+  const pick = async (s: string) => {
+    setProof([]); setFocus(s);
+    if (running || !sbx) return;
+    try { setWi(await whatIf(sbx, s)); } catch { setWi(null); }
   };
 
   const idle = !alerting.length && !events.length;
@@ -104,7 +120,7 @@ export default function App() {
       {loading && <div className="notice" role="status">Setting up your private copy of the company graph…</div>}
       <main>
         <section className="left">
-          <Graph data={graph} alerting={alerting} focus={proof.length ? null : focus} cleared={cleared} onPick={s => { setProof([]); setFocus(s); }} reads={reads} proof={proof} />
+          <Graph data={graph} alerting={alerting} focus={proof.length ? null : focus} cleared={cleared} onPick={pick} reads={reads} proof={proof} />
           {alerting.length > 0 && !events.length && <div className="storm">{alerting.length} services are alerting. The real cause may not be one of them.</div>}
           <div className="legend"><i className="d red" /> alerting <i className="d green" /> cleared by simulated fix <i className="d amber" /> suspect + what it takes down <i className="d hollow" /> unmonitored · dashed edge = async · colored rings = agent reading that node</div>
         </section>
@@ -112,7 +128,22 @@ export default function App() {
           {idle ? <Intro onSurprise={() => doChaos({ surprise: true })} disabled={busy || !sbx} nServices={graph?.nodes.length ?? 0} /> : null}
           {!idle && !events.length && <p className="hint">Press <b>Investigate</b>. Five agents will split the work and write their findings onto a shared board inside the graph.</p>}
           <Hero events={events} result={result} running={running} nAlerts={alerting.length} />
-          {result && <Verdict r={result} sandbox={sbx} onFocus={s => { setProof([]); setFocus(s); }} />}
+          {wi && !running && (
+            <div className="whatif">
+              <b>What if {wi.service} failed right now?</b> {wi.failing_now.length} services break immediately{wi.at_risk.length ? `, ${wi.at_risk.length} more fall behind (async)` : ""} ·
+              {" "}{wi.features.length ? wi.features.join(", ") : "no customer features"} · {wi.customers} customers · ${(wi.arr / 1e6).toFixed(1)}M ARR
+              <span className="x" onClick={() => setWi(null)}>×</span>
+            </div>
+          )}
+          {result && <Verdict r={result} sandbox={sbx} onFocus={pick} learned={learned}
+                              onResolved={id => { setLearned(l => [...l, id]); setResolved(true); setAlerting([]); }} />}
+          {result && !running && (
+            <div className="next">
+              {result.root_cause && result.root_cause !== "undetermined" && !resolved && <button onClick={doLate} disabled={busy}>⚡ A late alert arrives</button>}
+              {resolved && <button className="again" onClick={() => doChaos({ again: true })} disabled={busy}>↻ Same failure again: does it remember?</button>}
+              <span className="hint">Tip: click any service on the map to see what would break if it failed.</span>
+            </div>
+          )}
           {events.length > 0 && <Lanes events={events} running={running} />}
           <Board hyps={hyps} board={result?.board ?? null} focus={focus} onFocus={s => { setProof([]); setFocus(s); }} onProof={setProof} />
         </section>

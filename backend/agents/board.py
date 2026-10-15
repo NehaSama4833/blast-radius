@@ -214,6 +214,6 @@ def start_investigation(graph, alerting, model="stub", now=None):
     for a in AGENTS:
         graph.query("MERGE (:Agent {name:$n})", {"n": a})
     graph.query("""MATCH (i:Investigation {id:$id}) UNWIND $alerting AS name
-                   MATCH (a:Alert)-[:ON]->(:Service {name:name}) WHERE a.ts <= $now
+                   MATCH (a:Alert)-[:ON]->(:Service {name:name}) WHERE a.ts <= $now AND a.resolved IS NULL
                    MERGE (i)-[:TRIGGERED_BY]->(a)""", {"id": inv, "alerting": sorted(set(alerting)), "now": now})
     return Session(graph, inv, sorted(set(alerting)))

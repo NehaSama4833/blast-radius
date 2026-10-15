@@ -42,6 +42,8 @@ def ripple(graph, prev, late_alerting, now=None, policy=None, emit=None):
                    MERGE (i)-[:TRIGGERED_BY]->(x)""", {"i": inv, "a": new, "now": now})
     s = Session(graph, inv, alerting)
     s._n = max([int(r[0].rsplit("-", 1)[1]) for r in rows(graph, "MATCH (f:Finding) WHERE f.id STARTS WITH $p RETURN f.id", {"p": f"f-{inv}-"})] or [0])
+    s.listener = lambda agent, tool, params, cites: push(agent, tool, kind="read", tool=tool,
+                                                         services=[c.split(":", 1)[1] for c in cites if c.startswith("Service:")][:40])
     push("Lead", f"Ripple: {len(new)} late alert(s) on {', '.join(new)}; re-ranking with {len(alerting)} alerting services", kind="start", investigation=inv)
 
     before = s.call("Lead", "rank_root_causes", {"alerting": sorted(old), "top_k": 40}).data["candidates"]

@@ -98,3 +98,27 @@ def test_discord_webhook_rules():
     assert ok["posted"] and len(seen["body"]["content"]) <= 1900 and seen["body"]["allowed_mentions"] == {"parse": []}
     bad = post_incident("x", webhook_url="https://discord.com/api/webhooks/123/abc", transport=httpx.MockTransport(lambda r: httpx.Response(500)))
     assert bad["posted"] is False
+
+
+def test_again_whatif_late_and_calm_after_resolve(client):
+    sb = client.post("/api/sandbox", json={"world": "acme"}).json()["sandbox"]
+    assert client.post("/api/chaos", json={"sandbox": sb, "again": True}).status_code == 400          # nothing to repeat yet
+    assert client.post("/api/late", json={"sandbox": sb}).status_code == 400
+    w = client.post("/api/whatif", json={"sandbox": sb, "service": "ledger-db"}).json()
+    assert w["arr"] > 0 and "ledger-svc" in w["failing_now"]
+    assert client.post("/api/whatif", json={"sandbox": sb, "service": "nope"}).status_code == 400
+    client.post("/api/chaos", json={"sandbox": sb, "surprise": True})
+    res = events(client.post("/api/investigate", json={"sandbox": sb}))[-1]["result"]
+    lr = client.post("/api/late", json={"sandbox": sb})
+    if lr.status_code == 200:                         # surprise mode drops some alerts, so usually something arrives late
+        ev = events(lr)
+        assert ev[0]["type"] == "start" and ev[-1]["type"] == "done" and ev[-1]["result"]["ripple"]["new_alerts"]
+        res = ev[-1]["result"]
+    else:
+        assert lr.status_code == 409
+    client.post("/api/resolve", json={"sandbox": sb, "investigation": res["investigation"], "action": "restart", "ttr_min": 9})
+    assert client.get(f"/api/graph/{sb}").json()["alerting"] == []                                 # calm map after resolving
+    again = client.post("/api/chaos", json={"sandbox": sb, "again": True}).json()
+    assert again["n_alerts"] >= 1
+    res2 = events(client.post("/api/investigate", json={"sandbox": sb}))[-1]["result"]
+    assert res2["root_cause"] == res["root_cause"] and res2["precedent"]                          # memory: the lesson is cited
