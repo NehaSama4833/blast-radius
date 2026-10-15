@@ -4,8 +4,9 @@ Project: Blast Radius for Graph Hacks (Oct 15 00:01 - Oct 18 23:59 IST; submit b
 
 ## State (update at the end of every run)
 - Built and tested (117 tests): world, failure model, scenarios (dev/test frozen), tools, ranking, board + citation check, memory, verify, sandboxes, MCP server, rule policy, Claude policy (fake-model tested only), API + SSE, React UI, benchmark harness (graph-rules / graph-llm / docs-llm), deploy files, docs skeletons.
-- NOT done: real-API run (no key yet), re-recorded replay, final benchmark (Sat night, test split only with --final), BENCHMARK.md numbers, blog numbers, deployment (Neha's accounts Sat), submission.
-- Blockers on Neha: (1) Anthropic API key with spend limit; (2) repo must be added to the session's sources so `git push` works (403 until then; everything is committed locally and re-sent as a zip).
+- Real API key works (stored in /home/claude/.secrets/env.sh, chmod 600; source it before runs). Dev runs done Oct 15: graph-llm 10/10 at ~$0.008/inv, docs-llm 10/10 at ~$0.068/inv (honest: no accuracy gap on dev). Replay re-recorded with Claude. ~$0.80 spent of a $5 budget.
+- NOT done: final benchmark (Sat night, test split only with --final), BENCHMARK.md numbers, blog numbers, deployment (Neha's accounts Sat), submission.
+- Blockers on Neha: (1) confirm $5 spend limit; (2) repo must be added to the session's sources so `git push` works (403 until then; everything is committed locally and re-sent as a zip).
 
 ## Standing rules
 - Never run ranking/agents/benchmark on bench/scenarios/test.json before the Sat-night final.
