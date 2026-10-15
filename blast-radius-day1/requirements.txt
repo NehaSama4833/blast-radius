@@ -1,4 +1,0 @@
-falkordb>=1.0
-falkordblite>=0.10
-pytest>=8
-mcp>=2,<3
