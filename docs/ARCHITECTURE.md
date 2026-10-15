@@ -152,9 +152,19 @@ The docs-only baseline (`bench/baseline.py`) is the comparison: same facts as Ma
 
 Everything here is tested with a scripted fake model. It has NOT been run against the real API yet (no key), so prompts will need tuning on the dev scenarios only. When an API key exists, the web API uses these agents automatically (set USE_RULES=1 to force the rule policy).
 
+## 18. Extra features (from the design doc's "could ship" list)
+
+**Coverage-only ablation (`graph-coverage-only`).** The same graph tools and rule policy, but candidates are ranked by coverage alone, without the precision part of the score. Comparing it with `graph-rules` shows how much of the result comes from walking the graph and how much from our scoring formula. On the dev scenarios only: 8 of 9 single-cause storms correct without precision, against 9 of 9 with it. That is a dev number, not evidence.
+
+**Two-cause split (`cause_set`).** When no single service explains the storm, `rank_root_causes` also tries a greedy split: take the best precise candidate, remove the alerts it explains, rank the rest. It accepts only if each pick is at least 70% precise, explains 2+ alerts, and together they cover 85%+ of the alerts. The Lead still answers "undetermined" but now adds the two leads. On the dev ambiguous storm it finds kafka plus a lead in the fraud area (the real second cause is a silent store one layer below, which the split names as the alerting service above it, so the text says "the second may sit a layer below"). It finds nothing on all 9 single-cause dev storms.
+
+**Ripple (`backend/agents/ripple.py`).** A late alert after an investigation: re-rank with all alerts, then retire only the findings the new alert can change (findings whose receipt read a new alerting service, plus Impact findings on hypotheses whose explained-alert set changed). Changes, History and People findings are kept without re-running. Only the affected specialists re-run, only on the affected hypotheses; the Lead decides again. Retired findings and the old verdict stay in the graph (SUPERSEDED_FOR, PREVIOUSLY_CONCLUDED). On dev scenarios with the last two alerts delivered late, the answer matches a from-scratch run, and in one case (dev-hard-4) it fixes a first guess that was wrong. Not wired into the web API or UI yet.
+
+**docker-compose import (`backend/world/compose_import.py`).** Library and command line, not a web upload (the site has no free-text input on purpose). Depends_on becomes a sync edge, a broker dependency becomes an async edge, a missing healthcheck means "unmonitored", the layer is guessed from the image. It prints what it assumed.
+
 ## Not built yet
 
-Real-model tuning on dev scenarios, re-recording the replay from a real run, the final benchmark on the held-out test split, BENCHMARK.md, the blog and demo script.
+Ripple in the web screen, real-model tuning on dev scenarios, re-recording the replay from a real run, the final benchmark on the held-out test split, BENCHMARK.md, the blog and demo script.
 
 ## Small differences from the design doc
 

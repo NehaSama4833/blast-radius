@@ -111,6 +111,8 @@ class Session:
         self._check_cites("Lead", cites)
         if root_cause is None and confidence == "high":
             raise BoardError("an abstention cannot be high confidence")
+        # a re-decision (Ripple) keeps the old verdict for the audit trail but moves it off the live CONCLUDED edge
+        self.graph.query("MATCH (i:Investigation {id:$i})-[r:CONCLUDED]->(d:Decision) CREATE (i)-[:PREVIOUSLY_CONCLUDED]->(d) DELETE r", {"i": self.inv_id})
         self.graph.query("""MATCH (i:Investigation {id:$i})
                             CREATE (d:Decision {root_cause:$rc, confidence:$c, reasons:$r, actions:$a, receipt:$rec}),
                                    (i)-[:CONCLUDED]->(d)""",
@@ -126,6 +128,14 @@ class Session:
             self.graph.query("""MATCH (:Investigation {id:$i})-[:CONSIDERS]->(h:Hypothesis)-[:ABOUT]->(s:Service)
                                 SET h.status = CASE WHEN s.name = $rc THEN 'accepted' ELSE 'rejected' END""", {"i": self.inv_id, "rc": root_cause})
         return dict(root_cause=root_cause or "undetermined", confidence=confidence, reasons=reasons)
+
+    def supersede_findings(self, finding_ids):
+        """Retire findings that a late alert made out of date. They stay in the graph (audit trail) but leave the live board."""
+        if not finding_ids:
+            return 0
+        self.graph.query("""MATCH (f:Finding)-[r:SUPPORTS|WEAKENS]->(h:Hypothesis) WHERE f.id IN $ids
+                            CREATE (f)-[:SUPERSEDED_FOR]->(h) SET f.was = type(r) DELETE r""", {"ids": sorted(finding_ids)})
+        return len(finding_ids)
 
     # ---- reading the board (a graph query: the Lead's only view of the specialists) ----------------------------
     def read_board(self):

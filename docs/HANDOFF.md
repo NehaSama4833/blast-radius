@@ -13,7 +13,7 @@ Project: Blast Radius for Graph Hacks (Oct 15 00:01 - Oct 18 23:59 IST; submit b
 - Message Neha in simple words; end every run by scheduling the next send_later ~2h out.
 - Do not work around the sandbox network policy (openrouter.ai is blocked).
 
-## Extra features ("could ship" list in DESIGN.md section 10), approved by Neha, to build in this order (no API key needed)
+## Extra features: ALL FOUR BUILT AND TESTED (117 tests). Remaining: wire Ripple into API/UI if time; add graph-coverage-only to the final benchmark run. Original list:
 1. Ablation condition C: graph tools WITHOUT rank_root_causes (separates graph traversal from our algorithm). Add to bench/run.py as `graph-noranker`.
 2. "Multiple causes" clustering: rank candidates per connected cluster of alerting services; report up to two causes when clusters are independent.
 3. Ripple: when a late alert arrives mid-investigation, re-run only findings whose receipts read the affected nodes.

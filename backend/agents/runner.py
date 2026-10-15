@@ -172,6 +172,11 @@ def run_investigation(graph, alerting, now=None, emit=None, policy=None, model="
     push("Lead", "Read the board from the graph: " + "; ".join(f"{b['service']}: {len(b['findings'])} findings" for b in board))
     d = policy.decide(s, hyps, board, ctx, lambda a, t, kind="step", **x: push(a, t, kind, **x))
 
+    return conclude(graph, s, d, hyps, board, ctx, alerting, push, t0)
+
+
+def conclude(graph, s, d, hyps, board, ctx, alerting, push, t0):
+    """Everything after the Lead has decided: simulate the fix, record the decision, draft the message. Shared with ripple."""
     actions, verification = [], None
     if d["root_cause"]:
         best = d["best"]
