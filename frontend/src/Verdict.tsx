@@ -10,7 +10,7 @@ export default function Verdict({ r, sandbox, onFocus, onResolved, learned }: { 
     setBusy(true);
     try { await fn(); setNote(ok); } catch (e) { setNote(String((e as Error).message)); } finally { setBusy(false); }
   };
-  const undetermined = !r.root_cause;
+  const undetermined = !r.root_cause || r.root_cause === "undetermined";
   return (
     <div className={`verdict conf-${undetermined ? "none" : r.confidence}`}>
       <div className="v-h">

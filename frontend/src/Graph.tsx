@@ -54,6 +54,7 @@ export default function Graph({ data, alerting, focus, cleared, onPick, reads = 
         { selector: "node.proof", style: { "border-color": "#ffffff", "border-width": 5, "underlay-color": "#ffffff", "underlay-opacity": 0.25, "underlay-padding": 6 } as any },
       ],
       wheelSensitivity: 0.3,
+      maxZoom: 1.6,
     });
     c.on("tap", "node", ev => pick.current(ev.target.id()));
     cy.current = c;

@@ -54,3 +54,19 @@ def cleanup_expired(now=None, ttl=TTL_S):
             drop_graph(n)
             dropped.append(n)
     return dropped
+
+
+def create_from_world(world, now=None):
+    """A sandbox built from a world dict instead of a template (used for "bring your own docker-compose")."""
+    import json
+    from backend.graph.db import get_graph
+    from backend.world.loader import load_world
+    now = int(now if now is not None else time.time())
+    cleanup_expired(now)
+    if len(list_sandboxes()) >= MAX_SANDBOXES:
+        raise SandboxLimit("sandbox limit reached, try again later")
+    name = PREFIX + secrets.token_hex(4)
+    g = get_graph(name)
+    load_world(g, world, now=now)
+    g.query("MATCH (m:Meta) SET m.created_at = $now, m.sandbox = true, m.world_json = $w", {"now": now, "w": json.dumps(world)})
+    return name

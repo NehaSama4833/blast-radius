@@ -19,6 +19,8 @@ Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Con
 | **It remembers** | Resolving writes Incident, Resolution and Lesson nodes. Break the same thing again and the History agent cites what you fixed a minute ago. |
 | **Late alerts (Ripple)** | A new alert after the verdict retires only the findings whose receipts it touches; everything else is kept without re-running. |
 | **Knows when to say "I don't know"** | When two things broke at once it answers "undetermined" and offers both leads instead of guessing. |
+| **Ask the graph** | Type any question ("who should I page about ledger-db right now?"). A small model answers using only read-only graph tools; citations to nodes it never read are dropped, and the receipt shows every query. |
+| **Bring your own system** | Paste a `docker-compose.yml`: services become nodes, `depends_on` becomes edges, no healthcheck means unmonitored. Break your own architecture and watch the agents work. |
 | **Honest benchmark** | Graph agents vs. a docs-only agent with the same facts as Markdown + BM25 search, on 20 held-out scenarios frozen before any test run. See [docs/BENCHMARK.md](docs/BENCHMARK.md). |
 
 **Try it:** press *Break something at random* (the culprit is hidden from you and the agents), then *Investigate*. Click any service to see what would break if it failed. Every visitor gets a private copy of the company graph.

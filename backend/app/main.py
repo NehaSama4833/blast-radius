@@ -25,6 +25,9 @@ from backend.world.history import CHANGE_KINDS
 from backend.world.loader import load_alerts, load_world
 from backend.agents.ripple import ripple
 from backend.tools.registry import call_tool
+from backend.agents.ask import ask
+from backend.agents.llm import client_from_env
+from backend.world.compose_import import compose_to_world
 
 REPLAY_FILE = Path(__file__).with_name("replay.json")
 WORLDS = tuple(CONFIGS)
@@ -52,6 +55,7 @@ app.add_middleware(CORSMiddleware, allow_origins=[o for o in os.environ.get("ALL
 limiter = RateLimiter(n=int(os.environ.get("RATE_LIMIT_PER_MIN", "30")), per_s=60)
 daily = DailyCap(int(os.environ.get("DAILY_INVESTIGATION_CAP", "200")))
 _posts = RateLimiter(n=5, per_s=60)
+_asks = RateLimiter(n=6, per_s=60)          # free-text questions cost model tokens: tighter limit per visitor
 _tmpl_lock = threading.Lock()
 
 
@@ -82,6 +86,17 @@ def _world_of(g) -> str:
     return g.query("MATCH (m:Meta) RETURN m.world").result_set[0][0]
 
 
+def _world_for(g):
+    """World dict for the failure simulator: a built-in world, or the imported one stored on the sandbox's Meta node."""
+    name = _world_of(g)
+    if name in CONFIGS:
+        return get_world(name)
+    r = g.query("MATCH (m:Meta) RETURN m.world_json").result_set
+    if not r or not r[0][0]:
+        raise HTTPException(400, "this sandbox has no world description")
+    return json.loads(r[0][0])
+
+
 class NewSandbox(BaseModel):
     world: str
 
@@ -101,6 +116,15 @@ class WhatIf(BaseModel):
 
 class Late(BaseModel):
     sandbox: str
+
+
+class Ask(BaseModel):
+    sandbox: str
+    question: str = Field(min_length=3, max_length=300)
+
+
+class Import(BaseModel):
+    compose: str = Field(min_length=10, max_length=20000)
 
 
 LAST: dict = {}                  # sandbox -> {"service", "kind", "result"}; kept server-side so the culprit never reaches the browser
@@ -160,7 +184,7 @@ def graph_view(name: str, req: Request):
 def chaos(body: Chaos, req: Request):
     _guard(req)
     g = _sandbox_graph(body.sandbox)
-    world = get_world(_world_of(g))
+    world = _world_for(g)
     rng = random.Random()
     if body.again:
         last = LAST.get(body.sandbox)
@@ -170,13 +194,18 @@ def chaos(body: Chaos, req: Request):
     elif body.surprise:
         svcs = topo.svc_map(world)
         cands = [n for n, s in svcs.items() if not s["monitored"] and sum(1 for d in topo.sync_dependents(world, n) if svcs[d]["monitored"]) >= 4]
-        service, kind, noise = rng.choice(sorted(cands)), rng.choice(CHANGE_KINDS), dict(flaky=True, missing=True, distractors=2)
+        if not cands:                               # small imported systems: anything that takes at least one monitored service down
+            cands = [n for n in svcs if any(svcs[d]["monitored"] for d in topo.sync_dependents(world, n))] or list(svcs)
+        small = _world_of(g) not in CONFIGS               # imported systems are small: noise would drown the signal
+        service, kind = rng.choice(sorted(cands)), rng.choice(CHANGE_KINDS)
+        noise = {} if small else dict(flaky=True, missing=True, distractors=2)
     else:
         if body.service not in topo.svc_map(world):
             raise HTTPException(400, "unknown service")
         if body.change_kind not in CHANGE_KINDS:
             raise HTTPException(400, "unknown change kind")
         service, kind, noise = body.service, body.change_kind, {}
+    g.query("MATCH (a:Alert) WHERE a.resolved IS NULL SET a.resolved = true")    # a new break replaces the previous storm
     existing = g.query("MATCH (d:Deploy) RETURN count(d)").result_set[0][0]
     o = failure.break_service(world, service, kind, noise, rng, _id_offset=existing - len(world["deploys"]))
     failure.apply_outcome(g, o, int(time.time()))
@@ -262,7 +291,7 @@ def late_alert(body: Late, req: Request):
     last = LAST.get(body.sandbox)
     if not last or not last.get("result"):
         raise HTTPException(400, "run an investigation first")
-    world = get_world(_world_of(g))
+    world = _world_for(g)
     prev = last["result"]
     late = sorted(set(failure.alerting_for(world, [last["service"]])) - set(prev["alerting"]))
     if not late:
@@ -286,6 +315,52 @@ def late_alert(body: Late, req: Request):
             yield f"data: {json.dumps(e, default=str)}\n\n"
 
     return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.post("/api/ask")
+def ask_graph(body: Ask, req: Request):
+    """Free-text question answered with read-only graph tools and checked citations. Needs a model key."""
+    _guard(req)
+    g = _sandbox_graph(body.sandbox)
+    if not _asks.allow(_client_ip(req)):
+        raise HTTPException(429, "one question every 10 seconds, please")
+    client = make_ask_client()
+    if client is None:
+        raise HTTPException(503, "Ask the graph needs a model key on the server; everything else works without one")
+    if not daily.take():
+        raise HTTPException(503, "daily limit reached")
+    try:
+        return ask(g, body.question, client)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:
+        raise HTTPException(502, f"the model call failed ({type(e).__name__})")
+
+
+def make_ask_client():
+    if os.environ.get("USE_RULES") or not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or os.environ.get("LLM_API_KEY")):
+        return None
+    try:
+        return client_from_env()
+    except Exception:
+        return None
+
+
+@app.post("/api/import")
+def import_compose(body: Import, req: Request):
+    """Bring your own system: a docker-compose.yml becomes a private sandbox graph you can break and investigate."""
+    _guard(req)
+    try:
+        world, notes = compose_to_world(body.compose, name="imported")
+    except Exception as e:
+        raise HTTPException(400, f"could not read that compose file: {str(e)[:200]}")
+    if len(world["services"]) > 80:
+        raise HTTPException(400, "too many services (max 80)")
+    try:
+        name = sandbox.create_from_world(world)
+    except sandbox.SandboxLimit as e:
+        raise HTTPException(503, str(e))
+    return dict(sandbox=name, world="imported", services=len(world["services"]), edges=len(world["deps"]), notes=notes)
 
 
 @app.post("/api/resolve")

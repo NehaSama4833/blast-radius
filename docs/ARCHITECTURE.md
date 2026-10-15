@@ -162,6 +162,14 @@ Everything here is tested with a scripted fake model. It has NOT been run agains
 
 **docker-compose import (`backend/world/compose_import.py`).** Library and command line, not a web upload (the site has no free-text input on purpose). Depends_on becomes a sync edge, a broker dependency becomes an async edge, a missing healthcheck means "unmonitored", the layer is guessed from the image. It prints what it assumed.
 
+## 19. Ask the graph, bring your own system, and the demo moments
+
+**Ask the graph (`/api/ask`, `backend/agents/ask.py`).** The one free-text box on the site. A small model (Haiku) answers using only the read-only graph tools, in at most 5 steps. Its citations are checked like the agents': ids it never read are dropped and counted. Rate limited to 6 questions a minute per visitor and counted against the daily cap. Without a model key it says so and everything else still works.
+
+**Bring your own system (`/api/import`).** A pasted docker-compose.yml (max 20 KB, 80 services) becomes a private sandbox graph using the compose importer; the world description is stored on the sandbox's Meta node so the failure simulator can break it. Surprise mode adds no noise on these small graphs.
+
+**Demo moments.** `/api/whatif` (click a node: what breaks if it fails), `/api/late` (fire the alerts that the failure should have raised but were missing, then Ripple), `again` on `/api/chaos` (repeat the last break after resolving: the History agent cites the lesson just written). A new break or a resolve marks earlier alerts resolved, so storms never pile up.
+
 ## Not built yet
 
 Ripple in the web screen, real-model tuning on dev scenarios, re-recording the replay from a real run, the final benchmark on the held-out test split, BENCHMARK.md, the blog and demo script.

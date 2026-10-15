@@ -52,7 +52,9 @@ def compose_to_world(text, name="imported"):
                 notes.append(f"{n}: depends_on {d!r} is not a service in this file, skipped")
                 continue
             deps.append(dict(src=n, dst=d, kind="async" if d in brokers else "sync"))
-    world = dict(name=name, teams=[dict(name="imported", channel="#imported")], services=services, deps=deps, people=[], features=[], customers=[],
+    world = dict(name=name, teams=[dict(name="imported", channel="#imported")], services=services, deps=deps,
+                 people=[dict(name="You", handle="you", team="imported", timezone="UTC", on_call=True)],   # placeholder owner
+                 features=[], customers=[],
                  runbooks=[], deploys=[], incidents=[], lessons=[])
     return world, notes
 

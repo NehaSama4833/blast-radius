@@ -122,3 +122,47 @@ def test_again_whatif_late_and_calm_after_resolve(client):
     assert again["n_alerts"] >= 1
     res2 = events(client.post("/api/investigate", json={"sandbox": sb}))[-1]["result"]
     assert res2["root_cause"] == res["root_cause"] and res2["precedent"]                          # memory: the lesson is cited
+
+
+COMPOSE = """
+services:
+  web: {build: ., ports: ["80:80"], depends_on: [api], healthcheck: {test: ["CMD", "true"]}}
+  api: {build: ./api, depends_on: [db, cache], healthcheck: {test: ["CMD", "true"]}}
+  worker: {build: ./w, depends_on: [db], healthcheck: {test: ["CMD", "true"]}}
+  db: {image: postgres:16}
+  cache: {image: redis:7, healthcheck: {test: ["CMD", "true"]}}
+"""
+
+
+def test_bring_your_own_compose(client):
+    assert client.post("/api/import", json={"compose": "version: '3' # nothing"}).status_code == 400
+    r = client.post("/api/import", json={"compose": COMPOSE}).json()
+    sb = r["sandbox"]
+    assert r["services"] == 5 and any("db" in n for n in r["notes"])
+    g = client.get(f"/api/graph/{sb}").json()
+    assert len(g["nodes"]) == 5
+    c = client.post("/api/chaos", json={"sandbox": sb, "service": "db", "change_kind": "config"}).json()
+    assert set(c["alerting"]) == {"web", "api", "worker"}
+    res = events(client.post("/api/investigate", json={"sandbox": sb}))[-1]["result"]
+    assert res["root_cause"] == "db" and res["claims"]["rejected"] == 0
+    assert client.post("/api/chaos", json={"sandbox": sb, "surprise": True}).status_code == 200
+
+
+def test_ask_the_graph_checks_citations(client, monkeypatch):
+    from backend.agents.llm import Reply
+    sb = client.post("/api/sandbox", json={"world": "acme"}).json()["sandbox"]
+    monkeypatch.setattr(main, "make_ask_client", lambda: None)
+    assert client.post("/api/ask", json={"sandbox": sb, "question": "who owns redis-cache?"}).status_code == 503
+
+    class Fake:
+        provider = "anthropic"
+
+        def complete(self, model, system, messages, tools=None, **kw):
+            if len(messages) == 1:
+                return Reply(tool_calls=[dict(id="1", name="find_experts", args={"service": "redis-cache"})])
+            return Reply(text='{"answer": "Platform team owns it.", "cites": ["Service:redis-cache", "Person:nobody"]}')
+    monkeypatch.setattr(main, "make_ask_client", lambda: Fake())
+    r = client.post("/api/ask", json={"sandbox": sb, "question": "who owns redis-cache?"}).json()
+    assert r["answer"].startswith("Platform") and r["cites"] == ["Service:redis-cache"] and r["rejected"] == 1
+    assert r["calls"][0]["tool"] == "find_experts" and r["services"] == ["redis-cache"]
+    assert client.post("/api/ask", json={"sandbox": sb, "question": "x" * 400}).status_code == 422

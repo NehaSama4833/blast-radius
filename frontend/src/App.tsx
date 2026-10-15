@@ -7,6 +7,8 @@ import Board from "./Board";
 import Verdict from "./Verdict";
 import Intro from "./Intro";
 import Hero from "./Hero";
+import Ask from "./Ask";
+import Import from "./Import";
 import { COLOR } from "./agents";
 import type { Ev, GraphData, Hyp, Result } from "./types";
 
@@ -33,6 +35,8 @@ export default function App() {
   const [learned, setLearned] = useState<string[]>([]);
   const [resolved, setResolved] = useState(false);
   const [wi, setWi] = useState<WhatIfData | null>(null);
+  const [showImport, setShowImport] = useState(false);
+  const [importNotes, setImportNotes] = useState<string[]>([]);
 
   const reset = () => { queue.current = []; setEvents([]); setResult(null); setFocus(null); setProof([]); setWi(null); };
 
@@ -97,10 +101,18 @@ export default function App() {
   const idle = !alerting.length && !events.length;
   return (
     <div className="app">
+      {showImport && <Import onClose={() => setShowImport(false)} onDone={async d => {
+        setShowImport(false); reset(); setAlerting([]); setSbx(d.sandbox); setWorld("imported"); setImportNotes(d.notes);
+        setGraph(await getGraph(d.sandbox));
+      }} />}
       <header>
         <h1><span className="logo">◉</span> Blast Radius</h1>
         <label>World
-          <select aria-label="World" value={world} onChange={e => start(e.target.value)}>{worlds.map(w => <option key={w}>{w}</option>)}</select>
+          <select aria-label="World" value={world} onChange={e => e.target.value === "__import" ? setShowImport(true) : start(e.target.value)}>
+            {worlds.map(w => <option key={w}>{w}</option>)}
+            {world === "imported" && <option value="imported">your system</option>}
+            <option value="__import">+ your docker-compose…</option>
+          </select>
         </label>
         <div className="chaos">
           <select aria-label="Service to break" value={svc} onChange={e => setSvc(e.target.value)}>
@@ -128,6 +140,10 @@ export default function App() {
           {idle ? <Intro onSurprise={() => doChaos({ surprise: true })} disabled={busy || !sbx} nServices={graph?.nodes.length ?? 0} /> : null}
           {!idle && !events.length && <p className="hint">Press <b>Investigate</b>. Five agents will split the work and write their findings onto a shared board inside the graph.</p>}
           <Hero events={events} result={result} running={running} nAlerts={alerting.length} />
+          {world === "imported" && importNotes.length > 0 && !events.length && (
+            <div className="whatif"><b>Your system is loaded.</b> Assumptions: {importNotes.slice(0, 4).join("; ")}{importNotes.length > 4 ? "…" : ""}</div>
+          )}
+          {sbx && graph && <Ask key={sbx} sandbox={sbx} onProof={s => { setFocus(null); setProof(s); }} disabled={running} nodes={graph.nodes} />}
           {wi && !running && (
             <div className="whatif">
               <b>What if {wi.service} failed right now?</b> {wi.failing_now.length} services break immediately{wi.at_risk.length ? `, ${wi.at_risk.length} more fall behind (async)` : ""} ·
