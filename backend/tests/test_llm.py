@@ -93,3 +93,17 @@ def test_errors_and_key_hygiene(monkeypatch):
     assert model_for("agent", "openrouter") == "x/y" and model_for("lead", "anthropic") == "claude-sonnet-5-5"
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k2")
     assert client_from_env().provider == "anthropic"
+
+
+def test_generic_openai_compatible_provider_uses_base_url(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "openai")
+    monkeypatch.setenv("LLM_BASE_URL", "https://example.test/v1/chat/completions")
+    monkeypatch.setenv("LLM_API_KEY", "k-test")
+    seen = []
+    t = transport([{"choices": [{"message": {"content": "hi"}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 3, "completion_tokens": 1}}], seen)
+    c = client_from_env(t)
+    assert c.complete("gemini-x", "sys", [{"role": "user", "text": "yo"}]).text == "hi"
+    assert seen[0]["url"] == "https://example.test/v1/chat/completions" and seen[0]["headers"]["authorization"] == "Bearer k-test"
+    monkeypatch.delenv("LLM_BASE_URL")
+    with pytest.raises(LLMError):
+        client_from_env(t)

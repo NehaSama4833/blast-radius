@@ -41,7 +41,7 @@ def _safe_json(s):
 
 class ChatClient:
     def __init__(self, provider, api_key, transport=None, timeout=60):
-        if provider not in ("anthropic", "openrouter"):
+        if provider not in ("anthropic", "openrouter", "openai"):
             raise LLMError(f"unknown provider {provider!r}")
         if not api_key:
             raise LLMError("no API key configured")
@@ -55,7 +55,7 @@ class ChatClient:
         if self.provider == "anthropic":
             url, headers, body = ANTHROPIC_URL, {"x-api-key": self._key, "anthropic-version": "2023-06-01"}, self._anthropic_body(model, system, messages, tools, max_tokens, temperature)
         else:
-            url, headers, body = OPENROUTER_URL, {"Authorization": f"Bearer {self._key}"}, self._openai_body(model, system, messages, tools, max_tokens, temperature)
+            url, headers, body = (os.environ.get("LLM_BASE_URL", "").strip() if self.provider == "openai" else OPENROUTER_URL), {"Authorization": f"Bearer {self._key}"}, self._openai_body(model, system, messages, tools, max_tokens, temperature)
         with httpx.Client(transport=self._transport, timeout=self._timeout) as c:
             r = c.post(url, headers=headers, json=body)
         if r.status_code >= 400:
@@ -119,7 +119,11 @@ def client_from_env(transport=None) -> ChatClient:
     provider = os.environ.get("LLM_PROVIDER", "").strip().lower()
     if not provider:
         provider = "anthropic" if os.environ.get("ANTHROPIC_API_KEY") else "openrouter"
-    key = os.environ.get("ANTHROPIC_API_KEY" if provider == "anthropic" else "OPENROUTER_API_KEY", "")
+    # provider "openai" = any OpenAI-compatible chat-completions endpoint (e.g. Google AI Studio's free Gemini key):
+    #   LLM_PROVIDER=openai  LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/chat/completions  LLM_API_KEY=...
+    key = os.environ.get({"anthropic": "ANTHROPIC_API_KEY", "openai": "LLM_API_KEY"}.get(provider, "OPENROUTER_API_KEY"), "")
+    if provider == "openai" and not os.environ.get("LLM_BASE_URL", "").strip():
+        raise LLMError("set LLM_BASE_URL to the chat-completions URL of your provider")
     return ChatClient(provider, key, transport)
 
 
