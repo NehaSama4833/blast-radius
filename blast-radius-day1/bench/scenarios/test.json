@@ -1,0 +1,324 @@
+[
+  {
+    "change_kind": "config",
+    "id": "test-easy-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "mobile-bff"
+    ],
+    "seed": 648712,
+    "split": "test",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "test-easy-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "web-gateway"
+    ],
+    "seed": 888874,
+    "split": "test",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "test-easy-3",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "customer-portal"
+    ],
+    "seed": 721004,
+    "split": "test",
+    "tier": "easy",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "test-easy-4",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "audit-svc"
+    ],
+    "seed": 460947,
+    "split": "test",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "test-medium-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 929199,
+    "split": "test",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "test-medium-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 639733,
+    "split": "test",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "test-medium-3",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 60286,
+    "split": "test",
+    "tier": "medium",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "test-medium-4",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 72685,
+    "split": "test",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "test-medium-5",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "kafka"
+    ],
+    "seed": 38979,
+    "split": "test",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "test-medium-6",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 922976,
+    "split": "test",
+    "tier": "medium",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "test-hard-1",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 19264,
+    "split": "test",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "test-hard-2",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db"
+    ],
+    "seed": 193619,
+    "split": "test",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "test-hard-3",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 865955,
+    "split": "test",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "test-hard-4",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 140102,
+    "split": "test",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "test-hard-5",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 102491,
+    "split": "test",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "test-hard-6",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 34480,
+    "split": "test",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "test-hard-7",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db"
+    ],
+    "seed": 369490,
+    "split": "test",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "test-hard-8",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 642207,
+    "split": "test",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "test-ambiguous-1",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db",
+      "kafka"
+    ],
+    "seed": 760030,
+    "split": "test",
+    "tier": "ambiguous",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "test-ambiguous-2",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db",
+      "kafka"
+    ],
+    "seed": 216218,
+    "split": "test",
+    "tier": "ambiguous",
+    "world": "acme"
+  }
+]

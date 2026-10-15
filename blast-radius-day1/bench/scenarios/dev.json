@@ -1,0 +1,163 @@
+[
+  {
+    "change_kind": "code",
+    "id": "dev-easy-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "billing-svc"
+    ],
+    "seed": 461649,
+    "split": "dev",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "dev-easy-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "partner-api"
+    ],
+    "seed": 859791,
+    "split": "dev",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "dev-medium-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 639674,
+    "split": "dev",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "dev-medium-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "kafka"
+    ],
+    "seed": 867996,
+    "split": "dev",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "dev-medium-3",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 600258,
+    "split": "dev",
+    "tier": "medium",
+    "world": "globex"
+  },
+  {
+    "change_kind": "code",
+    "id": "dev-hard-1",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 828073,
+    "split": "dev",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "dev-hard-2",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db"
+    ],
+    "seed": 893931,
+    "split": "dev",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "dev-hard-3",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 578579,
+    "split": "dev",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "code",
+    "id": "dev-hard-4",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 690366,
+    "split": "dev",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "dev-ambiguous-1",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "kafka",
+      "fraud-store"
+    ],
+    "seed": 368352,
+    "split": "dev",
+    "tier": "ambiguous",
+    "world": "acme"
+  }
+]
