@@ -420,7 +420,7 @@ Tested against FalkorDB `graph` module v4.18.3 (embedded via `falkordblite` 0.10
 | Variable-length paths `*0..n`, and property filters on them (`{kind:'sync'}`) | ✅ works |
 | `shortestPath` | ✅ only inside `WITH` or `RETURN`, not as `MATCH p = shortestPath(...)` |
 | `algo.pageRank('Service','DEPENDS_ON')` | ✅ works |
-| `algo.betweenness({nodeLabels, relationshipTypes})` | ✅ works, and found the planted chokepoint |
+| `algo.betweenness({nodeLabels, relationshipTypes})` | ✅ runs, but is a sampled estimate (see FALKORDB_FINDINGS.md); replaced by exact Brandes on Oct 17 |
 | `algo.BFS`, `algo.WCC` | ✅ works |
 | Full-text index `db.idx.fulltext.createNodeIndex` / `queryNodes` | ✅ works |
 | `GRAPH.COPY` (Python `graph.copy()`) | ✅ works; writes to the copy don't touch the original |

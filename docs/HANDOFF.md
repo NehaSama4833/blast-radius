@@ -2,6 +2,11 @@
 
 Project: Blast Radius for Graph Hacks (Oct 15 00:01 - Oct 18 23:59 IST; submissions close Sun 18 Oct 23:59 IST (our own target: 18:00 IST, leaving a buffer)). Owner: Neha. Full plan: docs/DESIGN.md. Plain-language tour: docs/ARCHITECTURE.md.
 
+## Oct 17 early (IST 04:00-06:00)
+- FalkorDB Cloud instance was gone; Neha is creating a new one (Singapore or Mumbai) and updating FALKORDB_URL on Render.
+- Added: /api/ready + wake-up screen + DB socket timeouts; CI frontend job + badge; FalkorDB differential fuzzer with 3 findings (docs/FALKORDB_FINDINGS.md), exact betweenness; PyPI world + 21 real incidents (docs/PYPI.md: 40/42 dev, 21/21 test); Beat-the-agents game. 136 tests + 3 strict xfails.
+- The agents' tool registry is unchanged (suspect_releases is MCP-only), so tonight's final benchmark conditions are as planned. critical_services now uses exact betweenness.
+
 ## State (update at the end of every run)
 - Built and tested (117 tests): world, failure model, scenarios (dev/test frozen), tools, ranking, board + citation check, memory, verify, sandboxes, MCP server, rule policy, Claude policy (fake-model tested only), API + SSE, React UI, benchmark harness (graph-rules / graph-llm / docs-llm), deploy files, docs skeletons.
 - Real API key works (stored in /home/claude/.secrets/env.sh, chmod 600; source it before runs). Dev runs done Oct 15: graph-llm 10/10 at ~$0.008/inv, docs-llm 10/10 at ~$0.068/inv (honest: no accuracy gap on dev). Replay re-recorded with Claude. ~$0.80 spent of a $5 budget.

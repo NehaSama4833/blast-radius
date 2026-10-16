@@ -184,6 +184,37 @@ Everything here is tested with a scripted fake model. It has NOT been run agains
 
 After the Lead decides, the simulation result and the fact-check are stored on the Decision node. The Auditor then reads only the graph (never the team's memory or transcripts) and checks: the Decision links to the blamed service; the accepted hypothesis has support from at least one specialist (two for high confidence, not counting People); a blamed deploy went to that service before the first alert; the simulated fix clears at least 70% of alerts; the fact-check found nothing; an abstention is low confidence and considered alternatives. It writes `(:Agent {name:'Auditor'})-[:WROTE]->(:Audit {verdict, checks})-[:AUDITS]->(:Decision)`. It cannot change the verdict; disagreement is shown to the human.
 
+## 22. Testing FalkorDB itself (Oct 17)
+
+`bench/fuzz_falkordb.py` builds 2,000 small random graphs and compares FalkorDB's answers with NetworkX or a
+brute-force path enumeration: variable-length patterns with and without a path variable, unbounded reachability,
+`shortestPath`, `algo.BFS`, `algo.WCC`, `algo.pageRank`, `algo.betweenness`, `algo.SPpaths`, `algo.MSF`. Three
+differences were shrunk to 3- or 4-node graphs (`bench/falkordb_repros.py`) and written up in FALKORDB_FINDINGS.md.
+The repros are `xfail(strict=True)` tests, so CI notices when a FalkorDB release fixes one. `algo.betweenness`
+turned out to be a sampled estimate, so `critical_services` now computes exact betweenness (Brandes, in
+`backend/tools/centrality.py`) over the edges it reads from FalkorDB. Our variable-length query shapes were checked
+to be on the safe side of the other two findings (`test_our_query_shapes_are_not_affected_by_f1`).
+
+## 23. The PyPI world (Oct 17)
+
+`scripts/fetch_pypi.py` snapshots public PyPI metadata for the 15,000 most-downloaded packages (requirements and
+the upload time of every release). `backend/world/pypi.py` loads it with the same labels as the company worlds:
+packages are `Service`, required dependencies are `DEPENDS_ON {kind:'sync'}`, releases are `Deploy`. That is
+1.2 M nodes and 1.29 M relationships, loaded in about 30 s. `backend/tools/supply_chain.py` (`suspect_releases`)
+answers "which release in the last 48 hours explains these failing packages?" with one Cypher query, and
+`bench/pypi_incidents.py` replays 21 real incidents on it (PYPI.md). It is a benchmark and MCP world, not a web
+world: 15,000 nodes do not fit on one screen, and per-visitor copies of a 600 MB graph would not fit the free tier.
+
+## 24. Beat the agents (Oct 17)
+
+After a break, a visitor can click a service and lock in a guess (`POST /api/guess`). Guesses close when the agents
+start. When the investigation ends, the server compares guess, verdict and the hidden truth, writes a
+`Round` node into a shared `scoreboard` graph (outside the per-visitor sandboxes, so it is shared by everyone), and
+sends a `game` event with the running totals (`GET /api/scoreboard`).
+
+Also: `GET /api/ready` checks that the database answers, and the web screen polls it on load ("Waking up the
+server…") instead of hanging while a free-tier server cold-starts. The database client now has socket timeouts.
+
 ## Not built yet
 
 Ripple in the web screen, real-model tuning on dev scenarios, re-recording the replay from a real run, the final benchmark on the held-out test split, BENCHMARK.md, the blog and demo script.

@@ -1,5 +1,7 @@
 # Blast Radius
 
+[![ci](https://github.com/NehaSama4833/blast-radius/actions/workflows/ci.yml/badge.svg)](https://github.com/NehaSama4833/blast-radius/actions/workflows/ci.yml)
+
 > **Six alerts at 3 AM. None of them is the problem.**
 
 ![Demo: break something, five agents walk the graph, the silent culprit is found with receipts](docs/demo.gif)
@@ -7,6 +9,14 @@
 Blast Radius is a team of AI agents that investigates outages by walking a company's **dependency graph in FalkorDB**. The real cause is often a quiet database one hop below everything that is on fire, with no alert of its own. The agents find it, **prove every claim with a graph receipt**, and **test the fix on a copy of the graph** before a human approves it.
 
 Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Connected Data) and 02 (Agent Memory and Coordination).
+
+## Three things nobody else did
+
+| | |
+|---|---|
+| **We tested FalkorDB itself** | A differential fuzzer ran FalkorDB's path queries and algorithms on 2,000 random graphs against NetworkX and brute force. It found **3 reproducible issues** in FalkorDB 4.18.3, each shrunk to a 3- or 4-node graph: a bounded variable-length pattern that misses reachable nodes on a DAG, paths that are never extended past a repeated node, and `algo.betweenness` returning 0, 1 or 2 where the exact answer is 1. One affected us, and we fixed it. [docs/FALKORDB_FINDINGS.md](docs/FALKORDB_FINDINGS.md) |
+| **A real, huge graph** | The Python ecosystem in FalkorDB: **14,997 PyPI packages, 49,786 required dependencies and 1,193,520 real releases** (1.2 M nodes). We replayed **21 real supply-chain incidents** (numpy 2.0, setuptools 72, urllib3 2.0, pydantic 2, requests 2.32, …): the culprit release was ranked first in **61 of 63** runs (21/21 on the held-out split) among ~690 releases in the same 48 hours, in 0.06 s per query. Packages, edges, release times and culprits are real; which dependents fail is simulated. [docs/PYPI.md](docs/PYPI.md) |
+| **Beat the agents** | Break something, click the service you think did it and lock in your guess, then let the agents race you. Every round is stored in a shared FalkorDB graph, so the page shows humans vs. agents across all visitors. |
 
 ## What makes it different
 
@@ -35,7 +45,9 @@ Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Con
 | Role | How the graph is used |
 |---|---|
 | Dependency reasoning | Variable-length sync paths `-[:DEPENDS_ON*0..6 {kind:'sync'}]->` for coverage and blast radius; async edges for lag |
-| Graph algorithms | `algo.pageRank` and `algo.betweenness` for critical services |
+| Graph algorithms | `algo.pageRank` for the most depended-on services. Betweenness is computed exactly in Python over edges read from FalkorDB, because `algo.betweenness` samples ([findings](docs/FALKORDB_FINDINGS.md)) |
+| Real data at scale | The PyPI world: 1.2 M nodes and 1.29 M relationships, one Cypher query per triage (0.06 s median) |
+| Shared state | The Beat-the-agents scoreboard is one graph every visitor writes `Round` nodes into |
 | Simulation | `GRAPH.COPY` to a scratch graph, apply the fix, re-run the failure model, drop the copy |
 | Isolation | One `GRAPH.COPY` sandbox per visitor (2 h TTL, capped), so anyone can break the company safely |
 | Coordination | Investigation, Hypothesis, Finding, Decision nodes; the Lead's only view of its team is a graph query |
@@ -45,7 +57,7 @@ Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Con
 
 Remove FalkorDB and there is no ranking, no board, no memory, no sandbox and no simulation.
 
-**Also an MCP server:** the same 11 graph tools work from Claude Desktop or any MCP client: `python -m mcp_server.server` (see [mcp_server/server.py](mcp_server/server.py)).
+**Also an MCP server:** the same 11 graph tools (plus `suspect_releases` for the PyPI world) work from Claude Desktop or any MCP client: `python -m mcp_server.server`, or `GRAPH_NAME=pypi python -m mcp_server.server` for the real ecosystem (see [mcp_server/server.py](mcp_server/server.py)).
 
 ## How it works (one paragraph)
 
@@ -86,6 +98,8 @@ graph LR
 **The company** (loaded from a world generator, one graph per world): `Service {name, layer, tier, language, monitored}`, `Team {name, channel}`, `Person {name, handle, timezone, on_call}`, `Feature {name}`, `Customer {name, plan, arr}`, `Runbook {title, steps}-[:FOR]->Service`, `Deploy {id, ts, kind, summary, diff}`, `Commit {sha, message}` (`Person-[:AUTHORED]->Commit-[:TOUCHES]->Service`), `Alert {id, ts, signal, severity, resolved?}`.
 **Memory**: `Incident {id, title, summary, severity, started_at, resolved_at}` (full-text index on `summary`), `Resolution {summary, action, ttr_min}`, `Lesson {pattern, fix, times_seen, last_seen, avg_ttr_min}`, `Person-[:RESPONDED_TO]->Incident`, `Incident-[:AFFECTED]->Service`.
 **Coordination** (written by the agents during an investigation): `Investigation {id, ts, status, model}`, `Agent {name}`, `Hypothesis {id, rank, structural_score, status}`, `Finding {id, kind, text, weight, receipt}` (receipt = JSON: tool calls, parameters, graph version, nodes read), `Decision {root_cause, confidence, reasons, actions, receipt, message, verification, faith}`, `Audit {verdict, checks}`. Ripple keeps history with `Finding-[:SUPERSEDED_FOR]->Hypothesis` and `Investigation-[:PREVIOUSLY_CONCLUDED]->Decision`.
+**The PyPI world** (same labels, real data): `Service` = a package (`downloads_30d`), `DEPENDS_ON {kind:'sync'|'optional'}` = required dependency or extra, `Deploy {kind:'release', version, ts}` = a real release. Details in [docs/PYPI.md](docs/PYPI.md).
+**Game**: the `scoreboard` graph holds one `Round {world, truth, human, agent, human_ok, agent_ok, ts}` per guessed round.
 **Sandboxes**: every visitor gets `sbx_<id>`, a `GRAPH.COPY` of the world with a `Meta {world, loaded_at, created_at}` node; simulations use throwaway `sim_<id>` copies.
 
 ## Cypher queries and graph algorithms the product depends on
@@ -130,7 +144,17 @@ RETURN l.pattern, l.fix, l.times_seen, l.last_seen, l.avg_ttr_min, t.name, min(l
 MATCH (s:Service {name:$s})-[:OWNED_BY]->(t:Team)<-[:MEMBER_OF]-(p:Person) RETURN p.handle, p.name, p.timezone, p.on_call
 MATCH (p:Person)-[:RESPONDED_TO]->(i:Incident)-[:CAUSED_BY]->(:Deploy)-[:TO]->(:Service {name:$s}) RETURN p.handle, count(DISTINCT i)
 ```
-**Critical services**: `CALL algo.pageRank('Service','DEPENDS_ON')` and `CALL algo.betweenness({nodeLabels:['Service'], relationshipTypes:['DEPENDS_ON']})`.
+**Critical services**: `CALL algo.pageRank('Service','DEPENDS_ON')`, plus exact betweenness (Brandes) over `MATCH (a:Service)-[:DEPENDS_ON]->(b:Service) RETURN a.name, b.name` (`centrality.py`).
+**Supply-chain triage** (`supply_chain.py`, PyPI world): which recent release explains the failing packages?
+```cypher
+UNWIND $failing AS name
+MATCH p=(a:Service {name: name})-[:DEPENDS_ON*0..2 {kind: 'sync'}]->(c:Service)
+WITH DISTINCT a, c
+MATCH (d:Deploy)-[:TO]->(c) WHERE d.ts >= $t0 AND d.ts <= $t1
+WITH c, a, max(d.ts) AS last, collect(d.version) AS versions
+RETURN c.name, collect(DISTINCT a.name), max(last), head(versions)
+```
+**Scoreboard** (`main.py`): `CREATE (:Round {world, truth, human, agent, human_ok, agent_ok, ts})` in the shared `scoreboard` graph, read back with one `count`/`sum` query.
 **Fix simulation** (`verify.py`): `GRAPH.COPY` to `sim_<id>`, mark the fixed service healthy / the deploy rolled back in the copy, re-run the failure model over the copy's `DEPENDS_ON` edges, drop the copy.
 **The Lead's view of the team** (`board.py`, a graph query, not a transcript):
 ```cypher
@@ -150,6 +174,9 @@ RETURN h.id, h.rank, h.structural_score, h.status, s.name, f.id, f.kind, f.text,
 | ranking at 2,000 / 10,000 services | `python -m bench.scale --services 2000` | [docs/SCALE.md](docs/SCALE.md) |
 | pruning never changes the top 5 | `pytest backend/tests/test_ranking.py -k branch` | |
 | scenario files are frozen | `pytest backend/tests/test_failure_model.py -k frozen` | |
+| FalkorDB differential fuzz (2,000 graphs) | `python -m bench.fuzz_falkordb --graphs 2000 --seed 20261017` | [docs/FALKORDB_FINDINGS.md](docs/FALKORDB_FINDINGS.md) |
+| the 3 FalkorDB reproductions | `python -m bench.falkordb_repros` (or `FALKORDB_URL=... ` for a server) | [docs/FALKORDB_FINDINGS.md](docs/FALKORDB_FINDINGS.md) |
+| 21 real PyPI incidents | `python -m bench.pypi_incidents --split dev` and `--split test` | [docs/PYPI.md](docs/PYPI.md) |
 
 The held-out runner refuses to run without `--final`, and the scenario files are checked against their generator by a test, so nobody can tune on them by accident.
 
