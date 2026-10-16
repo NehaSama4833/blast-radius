@@ -53,6 +53,94 @@ Alerts arrive. The Lead calls `rank_root_causes` (parameterized Cypher finds who
 
 **Cost:** about $0.008 per investigation with Claude (Sonnet 5.5 lead, Haiku 5.5 specialists), about 8x cheaper than the docs-only baseline on the dev scenarios.
 
+## Graph data model
+
+```mermaid
+graph LR
+  Svc((Service)) -- "DEPENDS_ON {kind: sync|async}" --> Svc2((Service))
+  Svc -- OWNED_BY --> Team
+  Person -- MEMBER_OF --> Team
+  Feature -- USES --> Svc
+  Customer -- USES --> Feature
+  Deploy -- TO --> Svc
+  Person -- SHIPPED --> Deploy
+  Deploy -- INCLUDES --> Commit
+  Alert -- ON --> Svc
+  Incident -- CAUSED_BY --> Deploy
+  Incident -- RESOLVED_BY --> Resolution
+  Lesson -- ABOUT --> Svc
+  Lesson -- LEARNED_FROM --> Incident
+  Inv[Investigation] -- TRIGGERED_BY --> Alert
+  Inv -- CONSIDERS --> Hyp[Hypothesis]
+  Hyp -- ABOUT --> Svc
+  Agent -- WROTE --> Finding
+  Finding -- "SUPPORTS / WEAKENS" --> Hyp
+  Finding -- CITES --> Svc
+  Inv -- CONCLUDED --> Decision
+  Decision -- BLAMES --> Svc
+  Decision -- BLAMES --> Deploy
+  Audit -- AUDITS --> Decision
+  Inv -- BECAME --> Incident
+```
+
+**The company** (loaded from a world generator, one graph per world): `Service {name, layer, tier, language, monitored}`, `Team {name, channel}`, `Person {name, handle, timezone, on_call}`, `Feature {name}`, `Customer {name, plan, arr}`, `Runbook {title, steps}-[:FOR]->Service`, `Deploy {id, ts, kind, summary, diff}`, `Commit {sha, message}` (`Person-[:AUTHORED]->Commit-[:TOUCHES]->Service`), `Alert {id, ts, signal, severity, resolved?}`.
+**Memory**: `Incident {id, title, summary, severity, started_at, resolved_at}` (full-text index on `summary`), `Resolution {summary, action, ttr_min}`, `Lesson {pattern, fix, times_seen, last_seen, avg_ttr_min}`, `Person-[:RESPONDED_TO]->Incident`, `Incident-[:AFFECTED]->Service`.
+**Coordination** (written by the agents during an investigation): `Investigation {id, ts, status, model}`, `Agent {name}`, `Hypothesis {id, rank, structural_score, status}`, `Finding {id, kind, text, weight, receipt}` (receipt = JSON: tool calls, parameters, graph version, nodes read), `Decision {root_cause, confidence, reasons, actions, receipt, message, verification, faith}`, `Audit {verdict, checks}`. Ripple keeps history with `Finding-[:SUPERSEDED_FOR]->Hypothesis` and `Investigation-[:PREVIOUSLY_CONCLUDED]->Decision`.
+**Sandboxes**: every visitor gets `sbx_<id>`, a `GRAPH.COPY` of the world with a `Meta {world, loaded_at, created_at}` node; simulations use throwaway `sim_<id>` copies.
+
+## Cypher queries and graph algorithms the product depends on
+
+All queries are parameterised templates in `backend/tools/`; models never write Cypher (except the read-only, row-limited `explore_graph` escape hatch, run with `GRAPH.RO_QUERY`).
+
+**Which services could explain the alerts** (`ranking.py`), then scored in Python as coverage x precision:
+```cypher
+UNWIND $alerting AS name
+MATCH (a:Service {name: name})-[:DEPENDS_ON*0..6 {kind: 'sync'}]->(c:Service)
+RETURN c.name AS candidate, collect(DISTINCT a.name) AS explains
+```
+**What each candidate predicts should alert** (precision; evaluated in coverage order with an exact branch-and-bound):
+```cypher
+UNWIND $c AS cname
+MATCH (u:Service {monitored: true})-[:DEPENDS_ON*1..6 {kind: 'sync'}]->(c:Service {name: cname})
+RETURN cname, collect(DISTINCT u.name)
+```
+**Blast radius** (`read.py`): who breaks now (sync), who falls behind (async), features, customers, ARR:
+```cypher
+MATCH p=(u:Service)-[:DEPENDS_ON*1..6 {kind:'sync'}]->(s:Service {name:$service}) RETURN u.name, min(length(p))
+MATCH (f:Feature)-[:USES]->(x:Service) WHERE x.name IN $names RETURN DISTINCT f.name
+MATCH (c:Customer)-[:USES]->(f:Feature) WHERE f.name IN $feats RETURN DISTINCT c.name, c.plan, c.arr
+```
+**Recent changes** on a suspect and what it depends on:
+```cypher
+UNWIND $services AS n
+MATCH p=(s:Service {name:n})-[:DEPENDS_ON*0..2 {kind:'sync'}]->(t:Service)
+MATCH (d:Deploy)-[:TO]->(t) WHERE d.ts >= $since AND d.ts <= $until
+MATCH (a:Person)-[:SHIPPED]->(d)
+RETURN d.id, d.ts, d.kind, d.summary, t.name, a.handle, collect(DISTINCT n), min(length(p))
+```
+**History**: same root cause, same victims, or similar text (full-text index):
+```cypher
+MATCH (i:Incident)-[:CAUSED_BY]->(:Deploy)-[:TO]->(root:Service) MATCH (i)-[:RESOLVED_BY]->(r:Resolution) WHERE root.name = $s ...
+CALL db.idx.fulltext.queryNodes('Incident', $q) YIELD node, score RETURN node.id, score
+MATCH p=(s:Service {name:$s})-[:DEPENDS_ON*0..3 {kind:'sync'}]->(t:Service)<-[:ABOUT]-(l:Lesson)
+RETURN l.pattern, l.fix, l.times_seen, l.last_seen, l.avg_ttr_min, t.name, min(length(p)) - 1 AS hops
+```
+**Who to page**: owners, recent shippers, past responders:
+```cypher
+MATCH (s:Service {name:$s})-[:OWNED_BY]->(t:Team)<-[:MEMBER_OF]-(p:Person) RETURN p.handle, p.name, p.timezone, p.on_call
+MATCH (p:Person)-[:RESPONDED_TO]->(i:Incident)-[:CAUSED_BY]->(:Deploy)-[:TO]->(:Service {name:$s}) RETURN p.handle, count(DISTINCT i)
+```
+**Critical services**: `CALL algo.pageRank('Service','DEPENDS_ON')` and `CALL algo.betweenness({nodeLabels:['Service'], relationshipTypes:['DEPENDS_ON']})`.
+**Fix simulation** (`verify.py`): `GRAPH.COPY` to `sim_<id>`, mark the fixed service healthy / the deploy rolled back in the copy, re-run the failure model over the copy's `DEPENDS_ON` edges, drop the copy.
+**The Lead's view of the team** (`board.py`, a graph query, not a transcript):
+```cypher
+MATCH (:Investigation {id:$i})-[:CONSIDERS]->(h:Hypothesis)-[:ABOUT]->(s:Service)
+OPTIONAL MATCH (f:Finding)-[r:SUPPORTS|WEAKENS]->(h)
+OPTIONAL MATCH (a:Agent)-[:WROTE]->(f)
+RETURN h.id, h.rank, h.structural_score, h.status, s.name, f.id, f.kind, f.text, f.weight, type(r), a.name, f.receipt
+```
+**Memory write-back** (`memory.py`): `CREATE (n:Incident {...}), (i)-[:BECAME]->(n), (n)-[:RESOLVED_BY]->(:Resolution {...}), (n)-[:AFFECTED]->(s)`, then a `Lesson` upsert linked `ABOUT` the service and `LEARNED_FROM` the incident.
+
 ## Reproduce every number
 
 | Claim | Command | Write-up |
@@ -64,6 +152,10 @@ Alerts arrive. The Lead calls `rank_root_causes` (parameterized Cypher finds who
 | scenario files are frozen | `pytest backend/tests/test_failure_model.py -k frozen` | |
 
 The held-out runner refuses to run without `--final`, and the scenario files are checked against their generator by a test, so nobody can tune on them by accident.
+
+## Setup
+
+Two ways: everything local (below), or the hosted setup in [docs/DEPLOY.md](docs/DEPLOY.md) (FalkorDB Cloud + Render + Vercel). Copy `.env.example` to `.env` and fill in what you need; with no model key the app runs with the deterministic rule policy.
 
 ## Run the tests
 
