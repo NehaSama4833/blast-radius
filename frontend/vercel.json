@@ -1,5 +1,5 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/api/:path*", "destination": "https://YOUR-RENDER-APP.onrender.com/api/:path*" }]
+  "rewrites": [{ "source": "/api/:path*", "destination": "https://blast-radius-4893.onrender.com/api/:path*" }]
 }
