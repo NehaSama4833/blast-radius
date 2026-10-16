@@ -58,7 +58,9 @@ export default function Graph({ data, alerting, focus, cleared, onPick, reads = 
     });
     c.on("tap", "node", ev => pick.current(ev.target.id()));
     cy.current = c;
-    return () => { c.destroy(); cy.current = null; };
+    const ro = new ResizeObserver(() => { c.resize(); c.fit(undefined, 20); });
+    ro.observe(box.current);
+    return () => { ro.disconnect(); c.destroy(); cy.current = null; };
   }, [data]);
 
   useEffect(() => {

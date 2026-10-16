@@ -76,3 +76,7 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-
 .modal-box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;width:min(720px,100%);max-height:90vh;overflow:auto}
 .modal-box textarea{width:100%;height:320px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;font:12px/1.5 ui-monospace,monospace;padding:10px}
 .modal-box .btns{display:flex;gap:8px;margin-top:10px}
+main>section{min-width:0}.right{overflow-x:hidden}
+.verdict,.board,.hero,.lanes,.ask,.whatif{min-width:0;overflow-wrap:anywhere}
+@media(max-width:900px){main{display:flex;flex-direction:column;overflow:auto}.left{min-height:380px;border-right:none;border-bottom:1px solid var(--line)}
+  .right{overflow:visible}.app{height:auto;min-height:100vh}}

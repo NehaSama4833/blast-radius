@@ -28,7 +28,7 @@ export default function Verdict({ r, sandbox, onFocus, onResolved, learned }: { 
       )}
       <ul>{r.reasons.map((x, i) => <li key={i}>{x}</li>)}</ul>
       {r.verification && <p className="sim">Simulation: {r.verification.summary}</p>}
-      {r.impact && <p className="impact">At stake: {r.impact.features.join(", ")} · {r.impact.customers} customers · ${r.impact.arr.toLocaleString()} ARR</p>}
+      {r.impact && (r.impact.arr > 0 || r.impact.features.length > 0) && <p className="impact">At stake: {r.impact.features.join(", ")} · {r.impact.customers} customers · ${r.impact.arr.toLocaleString()} ARR</p>}
       {r.people && <p className="impact">Page: {r.people.pick.map(p => `${p.name} (${p.awake ? "awake" : "asleep"}, ${p.local_time})`).join(", ")} in {r.people.channel}</p>}
       <p className="meta">{r.claims.verified} claims checked against the graph, {r.claims.rejected} rejected · {r.duration_s}s</p>
       <div className="btns">
