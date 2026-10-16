@@ -30,8 +30,18 @@ def drop_graph(name: str) -> None:
         pass
 
 
-def copy_graph(src: str, dest: str):
-    """GRAPH.COPY: a fast, fully independent copy (used for sandboxes and benchmarks)."""
+def copy_graph(src: str, dest: str, attempts: int = 4):
+    """GRAPH.COPY: a fast, fully independent copy (used for sandboxes, simulations and benchmarks).
+
+    The server forks to take the copy; under memory or process pressure the fork can fail ("could not fork").
+    That is transient, so retry with a short backoff before giving up."""
+    import time
     drop_graph(dest)
-    get_db().select_graph(src).copy(dest)
-    return get_graph(dest)
+    for i in range(attempts):
+        try:
+            get_db().select_graph(src).copy(dest)
+            return get_graph(dest)
+        except Exception as e:
+            if "fork" not in str(e).lower() or i == attempts - 1:
+                raise
+            time.sleep(0.2 * (2 ** i))

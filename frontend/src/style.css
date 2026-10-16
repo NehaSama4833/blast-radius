@@ -83,3 +83,5 @@ main>section{min-width:0}.right{overflow-x:hidden}
 .faith{font-size:12px;margin:6px 0}.faith.ok{color:var(--green)}.faith.bad{color:var(--amber)}.faith ul{margin:4px 0 0 16px;padding:0}
 .pm h2{font-size:20px;margin:0 0 6px}.pm h4{margin:14px 0 4px;color:var(--blue)}.pm p,.pm li{font-size:13px}.pm ul{margin:4px 0 4px 18px;padding:0}
 .pm code{background:rgba(110,118,129,.2);padding:1px 4px;border-radius:4px}
+.audit{font-size:12px;margin:6px 0}.audit summary{cursor:pointer;font-weight:600}.audit.agree summary{color:var(--green)}.audit.disagree summary{color:var(--red)}
+.audit .sub{font-weight:400;color:var(--mut)}.audit ul{margin:4px 0 0 16px;padding:0;color:var(--fg)}

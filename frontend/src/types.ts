@@ -12,6 +12,7 @@ export type Result = {
   message: string; duration_s: number; alerting: string[]; blames_deploy: string | null;
   actions: { action: string; service: string; deploy_id?: string; rationale: string }[];
   impact?: { arr: number; features: string[]; customers: number; failing: number } | null;
+  audit?: { verdict: string; checks: { check: string; ok: boolean; detail: string }[] };
   faithfulness?: { verdict: { names: number; numbers: number; flagged: string[] }; findings: { names: number; numbers: number; flagged: string[] } };
   ripple?: { new_alerts: string[]; retired: number; kept: number; reran: string[]; new_hypotheses: string[] };
   precedent?: { incident: string; action: string; ttr: number; times_seen: number } | null;

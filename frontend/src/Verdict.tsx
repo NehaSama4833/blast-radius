@@ -36,6 +36,13 @@ export default function Verdict({ r, sandbox, onFocus, onResolved, learned }: { 
           ? <details className="faith bad"><summary>⚠ {flags.length} statement(s) mention a name or number no tool returned</summary><ul>{flags.map((x, i) => <li key={i}>{x}</li>)}</ul></details>
           : <p className="faith ok">✓ Fact-checked: all {v.names + f.names} names and {v.numbers + f.numbers} numbers in this verdict and its findings appear in the tool results the agents read.</p>;
       })()}
+      {r.audit && (
+        <details className={`audit ${r.audit.verdict}`}>
+          <summary>⚖ Auditor {r.audit.verdict === "agree" ? "agrees" : "disagrees"}: {r.audit.checks.filter(c => c.ok).length}/{r.audit.checks.length} checks pass
+            <span className="sub"> · a separate agent that reads only the graph</span></summary>
+          <ul>{r.audit.checks.map((c, i) => <li key={i}>{c.ok ? "✓" : "✗"} {c.check}: {c.detail}</li>)}</ul>
+        </details>
+      )}
       <p className="meta">{r.claims.verified} claims checked against the graph, {r.claims.rejected} rejected · {r.duration_s}s</p>
       <div className="btns">
         <button disabled={busy || undetermined} onClick={() => act(() => postToDiscord(sandbox, r.investigation), "Posted the drafted message to the channel.")}>Approve &amp; post</button>

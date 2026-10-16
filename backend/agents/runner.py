@@ -4,9 +4,11 @@ The runner is policy-agnostic. `RulePolicy` (below) is a deterministic, no-LLM p
 calls a careful engineer would; it lets the whole pipeline run and be tested without an API key, and doubles as the
 "graph tools, no LLM" ablation. A Claude-backed policy (Day 2, needs the key) plugs into the same three methods.
 """
+import json
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+from backend.agents.auditor import audit
 from backend.agents.board import AGENTS, BoardError, start_investigation
 
 TOP_K = 3
@@ -210,6 +212,12 @@ def conclude(graph, s, d, hyps, board, ctx, alerting, push, t0):
                   impact=best.get("impact"), people=best.get("people"), precedent=best.get("precedent"), message=message,
                   duration_s=round(time.time() - t0, 2), alerting=alerting, blames_deploy=d["blames_deploy"],
                   faithfulness=s.faithfulness(rec["reasons"], board))
+    # store what the Auditor needs ON the Decision node, then let it read the graph (and only the graph)
+    graph.query("MATCH (:Investigation {id:$i})-[:CONCLUDED]->(d:Decision) SET d.verification = $v, d.faith = $f",
+                {"i": s.inv_id, "v": json.dumps(verification) if verification else None, "f": json.dumps(result["faithfulness"])})
+    result["audit"] = audit(graph, s.inv_id)
+    push("Lead", f"Auditor (reads only the graph): {result['audit']['verdict']} - "
+                 f"{sum(c['ok'] for c in result['audit']['checks'])}/{len(result['audit']['checks'])} checks pass", kind="audit")
     push("Lead", f"Done in {result['duration_s']} s. Claims verified: {result['claims']['verified']}/{result['claims']['verified'] + result['claims']['rejected']}", kind="done", result=result)
     return result
 
