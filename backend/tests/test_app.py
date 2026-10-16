@@ -197,3 +197,34 @@ def test_ready_reports_db_down(client, monkeypatch):
     monkeypatch.setattr(main, "get_db", lambda: Dead)
     r = client.get("/api/ready")
     assert r.status_code == 503 and r.json()["state"] == "db_unavailable"
+
+
+def test_beat_the_agents_game(client):
+    drop_graph(main.SCOREBOARD)
+    sb = client.post("/api/sandbox", json={"world": "acme"}).json()["sandbox"]
+    assert client.post("/api/guess", json={"sandbox": sb, "service": "ledger-db"}).status_code == 400   # nothing broken yet
+    client.post("/api/chaos", json={"sandbox": sb, "service": "ledger-db", "change_kind": "config"})
+    assert client.post("/api/guess", json={"sandbox": sb, "service": "nope"}).status_code == 400
+    assert client.post("/api/guess", json={"sandbox": sb, "service": "payments-api"}).json()["ok"]
+    ev = events(client.post("/api/investigate", json={"sandbox": sb}))
+    game = [e for e in ev if e["type"] == "game"]
+    assert len(game) == 1 and game[0]["truth"] == "ledger-db" and game[0]["guess"] == "payments-api"
+    assert game[0]["human_ok"] is False and game[0]["agent_ok"] is True
+    assert client.get("/api/scoreboard").json() == dict(rounds=1, human_right=0, agent_right=1)
+    # once the agents have started, the round is closed to new guesses
+    assert client.post("/api/guess", json={"sandbox": sb, "service": "ledger-db"}).status_code == 400
+    client.post("/api/chaos", json={"sandbox": sb, "again": True})
+    assert client.post("/api/guess", json={"sandbox": sb, "service": "ledger-db"}).json()["ok"]
+    ev = events(client.post("/api/investigate", json={"sandbox": sb}))
+    assert [e for e in ev if e["type"] == "game"][0]["human_ok"] is True
+    assert client.get("/api/scoreboard").json() == dict(rounds=2, human_right=1, agent_right=2)
+    drop_graph(main.SCOREBOARD)
+
+
+def test_no_guess_no_round(client):
+    drop_graph(main.SCOREBOARD)
+    sb = client.post("/api/sandbox", json={"world": "acme"}).json()["sandbox"]
+    client.post("/api/chaos", json={"sandbox": sb, "service": "ledger-db", "change_kind": "config"})
+    ev = events(client.post("/api/investigate", json={"sandbox": sb}))
+    assert not [e for e in ev if e["type"] == "game"]
+    assert client.get("/api/scoreboard").json()["rounds"] == 0

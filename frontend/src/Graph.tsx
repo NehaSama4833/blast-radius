@@ -57,6 +57,7 @@ export default function Graph({ data, alerting, focus, cleared, onPick, reads = 
       maxZoom: 1.6,
     });
     c.on("tap", "node", ev => pick.current(ev.target.id()));
+    if (import.meta.env.DEV) (window as unknown as { __cy: unknown }).__cy = c;      // e2e tests drive the map
     cy.current = c;
     const ro = new ResizeObserver(() => { c.resize(); c.fit(undefined, 20); });
     ro.observe(box.current);

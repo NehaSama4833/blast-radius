@@ -128,6 +128,12 @@ class Import(BaseModel):
     compose: str = Field(min_length=10, max_length=20000)
 
 
+class GuessBody(BaseModel):
+    sandbox: str
+    service: str
+
+
+SCOREBOARD = "scoreboard"        # one shared graph (not a sandbox): every visitor's guess vs the agents' answer
 LAST: dict = {}                  # sandbox -> {"service", "kind", "result"}; kept server-side so the culprit never reaches the browser
 
 
@@ -233,7 +239,7 @@ def chaos(body: Chaos, req: Request):
     existing = g.query("MATCH (d:Deploy) RETURN count(d)").result_set[0][0]
     o = failure.break_service(world, service, kind, noise, rng, _id_offset=existing - len(world["deploys"]))
     failure.apply_outcome(g, o, int(time.time()))
-    LAST[body.sandbox] = dict(service=service, kind=kind, result=None)
+    LAST[body.sandbox] = dict(service=service, kind=kind, result=None, guess=None, started=False)
     # the response never reveals the culprit: that is the point of the game
     return dict(alerting=o.alerting, n_alerts=len(o.alerts))
 
@@ -264,12 +270,17 @@ def investigate(body: Investigate, req: Request):
     if not daily.take():
         return _replay()
     q: queue.Queue = queue.Queue()
+    if body.sandbox in LAST:
+        LAST[body.sandbox]["started"] = True                # guesses close when the agents start
 
     def work():
         try:
             res = run_investigation(g, alerting, now=now, emit=q.put, policy=make_policy())
             if body.sandbox in LAST:
                 LAST[body.sandbox]["result"] = res
+                game = _score_round(body.sandbox, res, _world_of(g))
+                if game:
+                    q.put(dict(type="game", agent="Lead", **game))
         except Exception as e:                    # never leave the stream hanging
             q.put(dict(type="error", agent="Lead", text=f"investigation failed: {type(e).__name__}"))
         q.put(None)
@@ -281,6 +292,57 @@ def investigate(body: Investigate, req: Request):
             yield f"data: {json.dumps(e, default=str)}\n\n"
 
     return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+def _score_round(sandbox, res, world):
+    """After the agents answer: compare the visitor's guess and the agents' answer with the truth, store the round."""
+    last = LAST.get(sandbox) or {}
+    if not last.get("guess"):
+        return None
+    truth, human, agent = last["service"], last["guess"], res.get("root_cause")
+    row = dict(world=world, truth=truth, human=human, agent=agent, human_ok=human == truth, agent_ok=agent == truth,
+               ts=int(time.time()))
+    try:
+        get_graph(SCOREBOARD).query("CREATE (:Round {world:$world, truth:$truth, human:$human, agent:$agent, "
+                                    "human_ok:$human_ok, agent_ok:$agent_ok, ts:$ts})", row)
+    except Exception:
+        pass                                    # the game must never break an investigation
+    last["guess"] = None
+    return dict(guess=human, answer=agent, truth=truth, human_ok=row["human_ok"], agent_ok=row["agent_ok"],
+                scoreboard=scoreboard_totals(),
+                text=f"Round over. You guessed {human}, the agents said {agent}, and the culprit was {truth}.")
+
+
+def scoreboard_totals():
+    try:
+        r = get_graph(SCOREBOARD).query("MATCH (r:Round) RETURN count(r), sum(CASE WHEN r.human_ok THEN 1 ELSE 0 END), "
+                                        "sum(CASE WHEN r.agent_ok THEN 1 ELSE 0 END)").result_set
+        n, h, a = r[0] if r else (0, 0, 0)
+    except Exception:
+        n, h, a = 0, 0, 0
+    n, h, a = int(n or 0), int(h or 0), int(a or 0)
+    return dict(rounds=n, human_right=h, agent_right=a)
+
+
+@app.post("/api/guess")
+def guess(body: GuessBody, req: Request):
+    """Beat the agents: guess the culprit after a break, before pressing Investigate."""
+    _guard(req)
+    g = _sandbox_graph(body.sandbox)
+    last = LAST.get(body.sandbox)
+    if not last or last.get("result") is not None:
+        raise HTTPException(400, "break something first")
+    if last.get("started"):
+        raise HTTPException(409, "too late: the agents are already investigating")
+    if not g.query("MATCH (s:Service {name:$n}) RETURN count(s)", {"n": body.service}).result_set[0][0]:
+        raise HTTPException(400, "unknown service")
+    last["guess"] = body.service
+    return dict(ok=True, guess=body.service)
+
+
+@app.get("/api/scoreboard")
+def scoreboard():
+    return scoreboard_totals()
 
 
 def _replay():

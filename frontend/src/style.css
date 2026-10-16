@@ -85,3 +85,7 @@ main>section{min-width:0}.right{overflow-x:hidden}
 .pm code{background:rgba(110,118,129,.2);padding:1px 4px;border-radius:4px}
 .audit{font-size:12px;margin:6px 0}.audit summary{cursor:pointer;font-weight:600}.audit.agree summary{color:var(--green)}.audit.disagree summary{color:var(--red)}
 .audit .sub{font-weight:400;color:var(--mut)}.audit ul{margin:4px 0 0 16px;padding:0;color:var(--fg)}
+
+.game { margin: 10px 0; padding: 10px 12px; border-radius: 10px; border: 1px solid #f5c542; background: rgba(245, 197, 66, .08); line-height: 1.5; }
+.game .score { opacity: .85; font-size: 13px; margin-top: 4px; }
+button.guess { margin-top: 8px; background: #f5c542; color: #111; border: 0; font-weight: 600; }

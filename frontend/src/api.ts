@@ -27,6 +27,8 @@ export async function waitReady(say: (m: string) => void, maxS = 180): Promise<v
   }
 }
 
+export const lockGuess = (sandbox: string, service: string) => post("/api/guess", { sandbox, service }).then(j<{ ok: boolean; guess: string }>);
+export const getScoreboard = () => fetch("/api/scoreboard").then(j<{ rounds: number; human_right: number; agent_right: number }>);
 export const getWorlds = () => slow("/api/worlds").then(j<{ worlds: { name: string; services: number }[]; actions: string[]; change_kinds: string[] }>);
 export const newSandbox = (world: string) => slow("/api/sandbox", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ world }) }).then(j<{ sandbox: string; world: string }>);
 export const getGraph = (s: string) => slow(`/api/graph/${s}`).then(j<GraphData>);

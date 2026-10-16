@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { chaos, getGraph, getWorlds, investigate, lateAlert, newSandbox, waitReady, whatIf } from "./api";
+import { chaos, getGraph, getWorlds, investigate, lateAlert, lockGuess, newSandbox, waitReady, whatIf } from "./api";
 import type { WhatIfData } from "./api";
 import Graph from "./Graph";
 import Lanes from "./Lanes";
@@ -33,6 +33,7 @@ export default function App() {
   const [running, setRunning] = useState(false);
   const [loading, setLoading] = useState(true);
   const [wake, setWake] = useState("");
+  const [guess, setGuess] = useState<string | null>(null);
   const queue = useRef<Ev[]>([]);
   const [learned, setLearned] = useState<string[]>([]);
   const [resolved, setResolved] = useState(false);
@@ -90,7 +91,7 @@ export default function App() {
   }, [events, running]);
 
   const doChaos = async (o: { service?: string; change_kind?: string; surprise?: boolean; again?: boolean }) => {
-    setErr(""); setBusy(true); reset(); setResolved(false);
+    setErr(""); setBusy(true); reset(); setResolved(false); setGuess(null);
     try { setAlerting((await chaos(sbx, o)).alerting); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
   const doInvestigate = async () => {
@@ -111,6 +112,12 @@ export default function App() {
     if (running || !sbx) return;
     try { setWi(await whatIf(sbx, s)); } catch { setWi(null); }
   };
+
+  const doGuess = async (s: string) => {
+    try { await lockGuess(sbx, s); setGuess(s); setWi(null); } catch (e) { setErr((e as Error).message); }
+  };
+  const game = events.find(e => e.type === "game");
+  const canGuess = alerting.length > 0 && !events.length && !running && !resolved;
 
   const idle = !alerting.length && !events.length;
   return (
@@ -150,7 +157,8 @@ export default function App() {
       <main>
         <section className="left">
           <Graph data={graph} alerting={alerting} focus={proof.length ? null : focus} cleared={cleared} onPick={pick} reads={reads} proof={proof} />
-          {alerting.length > 0 && !events.length && <div className="storm">{alerting.length} services are alerting. The real cause may not be one of them.</div>}
+          {alerting.length > 0 && !events.length && <div className="storm">{alerting.length} services are alerting. The real cause may not be one of them.
+            {" "}{guess ? <b>🎯 Your guess: {guess}. Now press Investigate.</b> : <span>🎯 Beat the agents: click the service you think broke and lock in your guess.</span>}</div>}
           <div className="legend"><i className="d red" /> alerting <i className="d green" /> cleared by simulated fix <i className="d amber" /> suspect + what it takes down <i className="d hollow" /> unmonitored · dashed edge = async · colored rings = agent reading that node</div>
         </section>
         <section className="right">
@@ -166,6 +174,13 @@ export default function App() {
               <b>What if {wi.service} failed right now?</b> {wi.failing_now.length} services break immediately{wi.at_risk.length ? `, ${wi.at_risk.length} more fall behind (async)` : ""} ·
               {" "}{wi.features.length ? wi.features.join(", ") : "no customer features"} · {wi.customers} customers · ${(wi.arr / 1e6).toFixed(1)}M ARR
               <span className="x" onClick={() => setWi(null)}>×</span>
+              {canGuess && <div><button className="guess" onClick={() => doGuess(wi.service)}>🎯 Lock in {wi.service} as my guess</button></div>}
+            </div>
+          )}
+          {game && game.scoreboard && (
+            <div className="game" role="status">
+              <div><b>Round over.</b> You guessed <b>{game.guess}</b> {game.human_ok ? "✅" : "❌"} · the agents said <b>{game.answer}</b> {game.agent_ok ? "✅" : "❌"} · it was <b>{game.truth}</b>.</div>
+              <div className="score">Everyone so far: humans {game.scoreboard.human_right}/{game.scoreboard.rounds} ({Math.round(100 * game.scoreboard.human_right / Math.max(1, game.scoreboard.rounds))}%) · agents {game.scoreboard.agent_right}/{game.scoreboard.rounds} ({Math.round(100 * game.scoreboard.agent_right / Math.max(1, game.scoreboard.rounds))}%)</div>
             </div>
           )}
           {result && <Verdict r={result} sandbox={sbx} onFocus={pick} learned={learned}

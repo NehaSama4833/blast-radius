@@ -19,4 +19,6 @@ export type Result = {
   people?: { pick: { name: string; awake: boolean; local_time: string }[]; channel: string } | null;
 };
 export type Ev = { type: string; agent: string; text: string; t?: number; replay?: boolean;
-  hypotheses?: Hyp[]; verification?: Verification; result?: Result; tool?: string; services?: string[]; ripple?: boolean };
+  hypotheses?: Hyp[]; verification?: Verification; result?: Result; tool?: string; services?: string[]; ripple?: boolean;
+  guess?: string; answer?: string; truth?: string; human_ok?: boolean; agent_ok?: boolean; scoreboard?: Score };
+export type Score = { rounds: number; human_right: number; agent_right: number };
