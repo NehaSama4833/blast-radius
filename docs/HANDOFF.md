@@ -1,6 +1,6 @@
 # Handoff notes (read this first in every new session)
 
-Project: Blast Radius for Graph Hacks (Oct 15 00:01 - Oct 18 23:59 IST; submit by Sun 18:00 IST). Owner: Neha. Full plan: docs/DESIGN.md. Plain-language tour: docs/ARCHITECTURE.md.
+Project: Blast Radius for Graph Hacks (Oct 15 00:01 - Oct 18 23:59 IST; submissions close Sun 18 Oct 23:59 IST (our own target: 18:00 IST, leaving a buffer)). Owner: Neha. Full plan: docs/DESIGN.md. Plain-language tour: docs/ARCHITECTURE.md.
 
 ## State (update at the end of every run)
 - Built and tested (117 tests): world, failure model, scenarios (dev/test frozen), tools, ranking, board + citation check, memory, verify, sandboxes, MCP server, rule policy, Claude policy (fake-model tested only), API + SSE, React UI, benchmark harness (graph-rules / graph-llm / docs-llm), deploy files, docs skeletons.
@@ -24,4 +24,8 @@ Each needs tests; clustering/Ripple must not change the frozen dev/test scenario
 
 ## Oct 15 night: feature work closed
 Added: first-glance UI, what-if, late alert (Ripple) in UI, memory "again" moment, Ask the graph, bring-your-own docker-compose, README GIF. 121 tests.
-FROM NOW ON: no new features. Remaining = deploy (Sat, Neha's accounts), final benchmark (Sat night: graph-llm, docs-llm, graph-rules, graph-coverage-only on test split with --final, once), BENCHMARK.md/blog numbers, polish, video (Neha, Sun), submit by Sun 18:00 IST.
+FROM NOW ON: no new features. Remaining = deploy (Sat, Neha's accounts), final benchmark (Sat night: graph-llm, docs-llm, graph-rules, graph-coverage-only on test split with --final, once), BENCHMARK.md/blog numbers, polish, video (Neha, Sun), submissions close Sun 18 Oct 23:59 IST (our own target: 18:00 IST, leaving a buffer).
+
+## Oct 16: from the organizers
+Submissions close 11:59 PM IST Oct 18. Side prize: best blog post (write-up of what we built, how it works, what we learned), submitted with the project; top 50 teams get t-shirts.
+Blog plan: Sunday morning I write a strong full draft from docs/BLOG_DRAFT.md with the real benchmark numbers and a "what we learned" section; Neha adds her own voice/stories and publishes. Live-site budget: DAILY_INVESTIGATION_CAP=30, then replay.
