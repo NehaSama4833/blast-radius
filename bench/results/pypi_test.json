@@ -1,0 +1,446 @@
+{
+ "split": "test",
+ "snapshot_fetched_at": 1792190111,
+ "top_list_updated": "2026-10-01 12:40:51",
+ "graph": {
+  "packages": 14997,
+  "edges": 97390,
+  "releases": 1193520,
+  "load_seconds": 27.5
+ },
+ "scenarios_sha256": "047d4fd567b15ffa399b5ea3d6949c195fd10a3cb464a16983635f9476d0cd5c",
+ "n_scenarios": 21,
+ "summary": {
+  "f1": {
+   "top1": 18,
+   "top3": 18,
+   "found": 21,
+   "n": 21,
+   "median_rank": 1
+  },
+  "coverage": {
+   "top1": 21,
+   "top3": 21,
+   "found": 21,
+   "n": 21,
+   "median_rank": 1
+  },
+  "newest": {
+   "top1": 0,
+   "top3": 0,
+   "found": 21,
+   "n": 21,
+   "median_rank": 27
+  },
+  "popular": {
+   "top1": 4,
+   "top3": 12,
+   "found": 21,
+   "n": 21,
+   "median_rank": 3
+  },
+  "bfs_agrees": 21,
+  "median_seconds": 0.066
+ },
+ "results": [
+  {
+   "id": "requests-2.32.0-s1",
+   "culprit": "requests",
+   "n_failing": 50,
+   "releases_in_window": 436,
+   "ranks": {
+    "f1": 8,
+    "coverage": 1,
+    "newest": 75,
+    "popular": 2
+   },
+   "top3": [
+    "requests",
+    "botocore",
+    "boto3"
+   ],
+   "seconds": 0.21,
+   "bfs_agrees": true
+  },
+  {
+   "id": "requests-2.32.0-s2",
+   "culprit": "requests",
+   "n_failing": 53,
+   "releases_in_window": 395,
+   "ranks": {
+    "f1": 5,
+    "coverage": 1,
+    "newest": 45,
+    "popular": 1
+   },
+   "top3": [
+    "requests",
+    "grpcio",
+    "aiozoneinfo"
+   ],
+   "seconds": 0.071,
+   "bfs_agrees": true
+  },
+  {
+   "id": "requests-2.32.0-s3",
+   "culprit": "requests",
+   "n_failing": 48,
+   "releases_in_window": 455,
+   "ranks": {
+    "f1": 5,
+    "coverage": 1,
+    "newest": 102,
+    "popular": 2
+   },
+   "top3": [
+    "requests",
+    "annotated-types",
+    "boto3"
+   ],
+   "seconds": 0.07,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pillow-10.0.0-s1",
+   "culprit": "pillow",
+   "n_failing": 47,
+   "releases_in_window": 554,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 24,
+    "popular": 5
+   },
+   "top3": [
+    "pillow",
+    "pydantic",
+    "pydantic-core"
+   ],
+   "seconds": 0.073,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pillow-10.0.0-s2",
+   "culprit": "pillow",
+   "n_failing": 50,
+   "releases_in_window": 554,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 24,
+    "popular": 5
+   },
+   "top3": [
+    "pillow",
+    "pydantic",
+    "pydantic-core"
+   ],
+   "seconds": 0.097,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pillow-10.0.0-s3",
+   "culprit": "pillow",
+   "n_failing": 47,
+   "releases_in_window": 627,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 7,
+    "popular": 5
+   },
+   "top3": [
+    "pillow",
+    "pydantic",
+    "pydantic-core"
+   ],
+   "seconds": 0.102,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pandas-2.0.0-s1",
+   "culprit": "pandas",
+   "n_failing": 52,
+   "releases_in_window": 630,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 74,
+    "popular": 2
+   },
+   "top3": [
+    "pandas",
+    "pydantic-core",
+    "semver"
+   ],
+   "seconds": 0.061,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pandas-2.0.0-s2",
+   "culprit": "pandas",
+   "n_failing": 45,
+   "releases_in_window": 590,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 24,
+    "popular": 2
+   },
+   "top3": [
+    "pandas",
+    "pydantic-core",
+    "typeguard"
+   ],
+   "seconds": 0.062,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pandas-2.0.0-s3",
+   "culprit": "pandas",
+   "n_failing": 47,
+   "releases_in_window": 622,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 62,
+    "popular": 2
+   },
+   "top3": [
+    "pandas",
+    "pydantic-core",
+    "datarobot-early-access"
+   ],
+   "seconds": 0.061,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pytest-8.0.0-s1",
+   "culprit": "pytest",
+   "n_failing": 43,
+   "releases_in_window": 698,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 57,
+    "popular": 3
+   },
+   "top3": [
+    "pytest",
+    "colorlog",
+    "onnxscript"
+   ],
+   "seconds": 0.034,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pytest-8.0.0-s2",
+   "culprit": "pytest",
+   "n_failing": 46,
+   "releases_in_window": 697,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 53,
+    "popular": 3
+   },
+   "top3": [
+    "pytest",
+    "coverage",
+    "colorlog"
+   ],
+   "seconds": 0.049,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pytest-8.0.0-s3",
+   "culprit": "pytest",
+   "n_failing": 45,
+   "releases_in_window": 700,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 17,
+    "popular": 3
+   },
+   "top3": [
+    "pytest",
+    "coverage",
+    "hypothesis"
+   ],
+   "seconds": 0.043,
+   "bfs_agrees": true
+  },
+  {
+   "id": "cryptography-3.4-s1",
+   "culprit": "cryptography",
+   "n_failing": 50,
+   "releases_in_window": 499,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 18,
+    "popular": 1
+   },
+   "top3": [
+    "cryptography",
+    "markdown-it-py",
+    "numpy"
+   ],
+   "seconds": 0.071,
+   "bfs_agrees": true
+  },
+  {
+   "id": "cryptography-3.4-s2",
+   "culprit": "cryptography",
+   "n_failing": 46,
+   "releases_in_window": 501,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 13,
+    "popular": 1
+   },
+   "top3": [
+    "cryptography",
+    "numpy",
+    "markdown-it-py"
+   ],
+   "seconds": 0.066,
+   "bfs_agrees": true
+  },
+  {
+   "id": "cryptography-3.4-s3",
+   "culprit": "cryptography",
+   "n_failing": 48,
+   "releases_in_window": 501,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 13,
+    "popular": 1
+   },
+   "top3": [
+    "cryptography",
+    "markdown-it-py",
+    "numpy"
+   ],
+   "seconds": 0.093,
+   "bfs_agrees": true
+  },
+  {
+   "id": "openai-1.0.0-s1",
+   "culprit": "openai",
+   "n_failing": 41,
+   "releases_in_window": 527,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 20,
+    "popular": 5
+   },
+   "top3": [
+    "openai",
+    "aiohttp",
+    "uvicorn"
+   ],
+   "seconds": 0.1,
+   "bfs_agrees": true
+  },
+  {
+   "id": "openai-1.0.0-s2",
+   "culprit": "openai",
+   "n_failing": 41,
+   "releases_in_window": 604,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 23,
+    "popular": 8
+   },
+   "top3": [
+    "openai",
+    "pydantic-core",
+    "starlette"
+   ],
+   "seconds": 0.088,
+   "bfs_agrees": true
+  },
+  {
+   "id": "openai-1.0.0-s3",
+   "culprit": "openai",
+   "n_failing": 28,
+   "releases_in_window": 570,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 65,
+    "popular": 5
+   },
+   "top3": [
+    "openai",
+    "aiohttp",
+    "starlette"
+   ],
+   "seconds": 0.062,
+   "bfs_agrees": true
+  },
+  {
+   "id": "django-4.0-s1",
+   "culprit": "django",
+   "n_failing": 45,
+   "releases_in_window": 521,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 44,
+    "popular": 19
+   },
+   "top3": [
+    "django",
+    "django-mysql",
+    "django-hijack"
+   ],
+   "seconds": 0.018,
+   "bfs_agrees": true
+  },
+  {
+   "id": "django-4.0-s2",
+   "culprit": "django",
+   "n_failing": 48,
+   "releases_in_window": 523,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 27,
+    "popular": 20
+   },
+   "top3": [
+    "django",
+    "django-cors-headers",
+    "setuptools"
+   ],
+   "seconds": 0.03,
+   "bfs_agrees": true
+  },
+  {
+   "id": "django-4.0-s3",
+   "culprit": "django",
+   "n_failing": 47,
+   "releases_in_window": 523,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 27,
+    "popular": 20
+   },
+   "top3": [
+    "django",
+    "django-quill-editor",
+    "edx-enterprise"
+   ],
+   "seconds": 0.022,
+   "bfs_agrees": true
+  }
+ ]
+}

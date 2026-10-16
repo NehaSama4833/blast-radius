@@ -25,7 +25,10 @@ def graph():
     global _graph
     if _graph is None:
         g = get_graph(GRAPH_NAME)
-        if g.query("MATCH (s:Service) RETURN count(s)").result_set[0][0] == 0:
+        if g.query("MATCH (s:Service) RETURN count(s)").result_set[0][0] == 0 and GRAPH_NAME == "pypi":
+            from backend.world.pypi import load_pypi
+            load_pypi(g)                                   # the real PyPI ecosystem (~30 s the first time)
+        elif g.query("MATCH (s:Service) RETURN count(s)").result_set[0][0] == 0:
             from backend.world import get_world
             from backend.world.loader import load_world
             load_world(g, get_world(GRAPH_NAME.split("_")[0] if GRAPH_NAME.split("_")[0] in ("acme", "globex") else "acme"), now=time.time())
@@ -105,6 +108,16 @@ def critical_services(limit: int = 5) -> str:
 def path_between(a: str, b: str, max_hops: int = 8) -> str:
     """Shortest dependency path between two services."""
     return _run("path_between", a=a, b=b, max_hops=max_hops)
+
+
+@mcp.tool()
+def suspect_releases(failing: list[str], at_ts: int, window_h: int = 48, hops: int = 2, top_k: int = 5) -> str:
+    """PyPI world (GRAPH_NAME=pypi): which release in the window before at_ts explains these failing packages?"""
+    from backend.tools.supply_chain import suspect_releases as sr
+    try:
+        return json.dumps(sr(graph(), failing, at_ts, window_h=window_h, hops=hops, top_k=top_k).as_dict(), default=str)
+    except ValueError as e:
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()

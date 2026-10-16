@@ -1,0 +1,845 @@
+{
+ "split": "dev",
+ "snapshot_fetched_at": 1792190111,
+ "top_list_updated": "2026-10-01 12:40:51",
+ "graph": {
+  "packages": 14997,
+  "edges": 97390,
+  "releases": 1193520,
+  "load_seconds": 28.8
+ },
+ "scenarios_sha256": "86454e3645e212b442db4a8735e92126e5df8d6a6c1eaae7a9051d24327b47de",
+ "n_scenarios": 42,
+ "summary": {
+  "f1": {
+   "top1": 25,
+   "top3": 34,
+   "found": 42,
+   "n": 42,
+   "median_rank": 1
+  },
+  "coverage": {
+   "top1": 40,
+   "top3": 42,
+   "found": 42,
+   "n": 42,
+   "median_rank": 1
+  },
+  "newest": {
+   "top1": 0,
+   "top3": 0,
+   "found": 42,
+   "n": 42,
+   "median_rank": 35
+  },
+  "popular": {
+   "top1": 3,
+   "top3": 18,
+   "found": 42,
+   "n": 42,
+   "median_rank": 4
+  },
+  "bfs_agrees": 42,
+  "median_seconds": 0.063
+ },
+ "results": [
+  {
+   "id": "numpy-2.0.0-s1",
+   "culprit": "numpy",
+   "n_failing": 52,
+   "releases_in_window": 414,
+   "ranks": {
+    "f1": 4,
+    "coverage": 1,
+    "newest": 6,
+    "popular": 3
+   },
+   "top3": [
+    "numpy",
+    "scipy",
+    "narwhals"
+   ],
+   "seconds": 0.186,
+   "bfs_agrees": true
+  },
+  {
+   "id": "numpy-2.0.0-s2",
+   "culprit": "numpy",
+   "n_failing": 50,
+   "releases_in_window": 394,
+   "ranks": {
+    "f1": 3,
+    "coverage": 1,
+    "newest": 11,
+    "popular": 3
+   },
+   "top3": [
+    "numpy",
+    "scipy",
+    "narwhals"
+   ],
+   "seconds": 0.08,
+   "bfs_agrees": true
+  },
+  {
+   "id": "numpy-2.0.0-s3",
+   "culprit": "numpy",
+   "n_failing": 43,
+   "releases_in_window": 414,
+   "ranks": {
+    "f1": 4,
+    "coverage": 1,
+    "newest": 6,
+    "popular": 3
+   },
+   "top3": [
+    "numpy",
+    "scipy",
+    "narwhals"
+   ],
+   "seconds": 0.065,
+   "bfs_agrees": true
+  },
+  {
+   "id": "setuptools-72.0.0-s1",
+   "culprit": "setuptools",
+   "n_failing": 51,
+   "releases_in_window": 289,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 31,
+    "popular": 1
+   },
+   "top3": [
+    "setuptools",
+    "pip",
+    "starlette"
+   ],
+   "seconds": 0.048,
+   "bfs_agrees": true
+  },
+  {
+   "id": "setuptools-72.0.0-s2",
+   "culprit": "setuptools",
+   "n_failing": 50,
+   "releases_in_window": 303,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 10,
+    "popular": 1
+   },
+   "top3": [
+    "setuptools",
+    "pip",
+    "narwhals"
+   ],
+   "seconds": 0.051,
+   "bfs_agrees": true
+  },
+  {
+   "id": "setuptools-72.0.0-s3",
+   "culprit": "setuptools",
+   "n_failing": 47,
+   "releases_in_window": 293,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 16,
+    "popular": 1
+   },
+   "top3": [
+    "setuptools",
+    "narwhals",
+    "pip"
+   ],
+   "seconds": 0.048,
+   "bfs_agrees": true
+  },
+  {
+   "id": "urllib3-2.0.0-s1",
+   "culprit": "urllib3",
+   "n_failing": 49,
+   "releases_in_window": 745,
+   "ranks": {
+    "f1": 2,
+    "coverage": 1,
+    "newest": 31,
+    "popular": 2
+   },
+   "top3": [
+    "urllib3",
+    "requests",
+    "yarl"
+   ],
+   "seconds": 0.083,
+   "bfs_agrees": true
+  },
+  {
+   "id": "urllib3-2.0.0-s2",
+   "culprit": "urllib3",
+   "n_failing": 52,
+   "releases_in_window": 751,
+   "ranks": {
+    "f1": 2,
+    "coverage": 1,
+    "newest": 67,
+    "popular": 2
+   },
+   "top3": [
+    "urllib3",
+    "requests",
+    "pydantic-core"
+   ],
+   "seconds": 0.092,
+   "bfs_agrees": true
+  },
+  {
+   "id": "urllib3-2.0.0-s3",
+   "culprit": "urllib3",
+   "n_failing": 46,
+   "releases_in_window": 745,
+   "ranks": {
+    "f1": 3,
+    "coverage": 1,
+    "newest": 31,
+    "popular": 2
+   },
+   "top3": [
+    "urllib3",
+    "requests",
+    "yarl"
+   ],
+   "seconds": 0.081,
+   "bfs_agrees": true
+  },
+  {
+   "id": "cython-3.0.0-s1",
+   "culprit": "cython",
+   "n_failing": 13,
+   "releases_in_window": 446,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 60,
+    "popular": 7
+   },
+   "top3": [
+    "cython",
+    "platformdirs",
+    "holidays"
+   ],
+   "seconds": 0.013,
+   "bfs_agrees": true
+  },
+  {
+   "id": "cython-3.0.0-s2",
+   "culprit": "cython",
+   "n_failing": 9,
+   "releases_in_window": 525,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 108,
+    "popular": 8
+   },
+   "top3": [
+    "cython",
+    "kaldialign",
+    "holidays"
+   ],
+   "seconds": 0.011,
+   "bfs_agrees": true
+  },
+  {
+   "id": "cython-3.0.0-s3",
+   "culprit": "cython",
+   "n_failing": 12,
+   "releases_in_window": 480,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 79,
+    "popular": 7
+   },
+   "top3": [
+    "cython",
+    "holidays",
+    "platformdirs"
+   ],
+   "seconds": 0.013,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pydantic-2.0-s1",
+   "culprit": "pydantic",
+   "n_failing": 48,
+   "releases_in_window": 816,
+   "ranks": {
+    "f1": 3,
+    "coverage": 2,
+    "newest": 17,
+    "popular": 4
+   },
+   "top3": [
+    "typing-extensions",
+    "pydantic",
+    "pydantic-core"
+   ],
+   "seconds": 0.12,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pydantic-2.0-s2",
+   "culprit": "pydantic",
+   "n_failing": 45,
+   "releases_in_window": 816,
+   "ranks": {
+    "f1": 7,
+    "coverage": 2,
+    "newest": 26,
+    "popular": 4
+   },
+   "top3": [
+    "typing-extensions",
+    "pydantic",
+    "pydantic-core"
+   ],
+   "seconds": 0.111,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pydantic-2.0-s3",
+   "culprit": "pydantic",
+   "n_failing": 47,
+   "releases_in_window": 819,
+   "ranks": {
+    "f1": 4,
+    "coverage": 1,
+    "newest": 41,
+    "popular": 4
+   },
+   "top3": [
+    "pydantic",
+    "typing-extensions",
+    "pydantic-core"
+   ],
+   "seconds": 0.131,
+   "bfs_agrees": true
+  },
+  {
+   "id": "markupsafe-2.1.0-s1",
+   "culprit": "markupsafe",
+   "n_failing": 17,
+   "releases_in_window": 766,
+   "ranks": {
+    "f1": 3,
+    "coverage": 1,
+    "newest": 18,
+    "popular": 4
+   },
+   "top3": [
+    "markupsafe",
+    "botocore",
+    "boto3"
+   ],
+   "seconds": 0.029,
+   "bfs_agrees": true
+  },
+  {
+   "id": "markupsafe-2.1.0-s2",
+   "culprit": "markupsafe",
+   "n_failing": 18,
+   "releases_in_window": 765,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 6,
+    "popular": 4
+   },
+   "top3": [
+    "markupsafe",
+    "itsdangerous",
+    "filelock"
+   ],
+   "seconds": 0.026,
+   "bfs_agrees": true
+  },
+  {
+   "id": "markupsafe-2.1.0-s3",
+   "culprit": "markupsafe",
+   "n_failing": 17,
+   "releases_in_window": 766,
+   "ranks": {
+    "f1": 2,
+    "coverage": 1,
+    "newest": 18,
+    "popular": 4
+   },
+   "top3": [
+    "markupsafe",
+    "itsdangerous",
+    "filelock"
+   ],
+   "seconds": 0.028,
+   "bfs_agrees": true
+  },
+  {
+   "id": "protobuf-4.21.0-s1",
+   "culprit": "protobuf",
+   "n_failing": 49,
+   "releases_in_window": 815,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 35,
+    "popular": 3
+   },
+   "top3": [
+    "protobuf",
+    "huggingface-hub",
+    "h5py"
+   ],
+   "seconds": 0.058,
+   "bfs_agrees": true
+  },
+  {
+   "id": "protobuf-4.21.0-s2",
+   "culprit": "protobuf",
+   "n_failing": 47,
+   "releases_in_window": 815,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 35,
+    "popular": 3
+   },
+   "top3": [
+    "protobuf",
+    "tomlkit",
+    "h5py"
+   ],
+   "seconds": 0.036,
+   "bfs_agrees": true
+  },
+  {
+   "id": "protobuf-4.21.0-s3",
+   "culprit": "protobuf",
+   "n_failing": 45,
+   "releases_in_window": 816,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 17,
+    "popular": 3
+   },
+   "top3": [
+    "protobuf",
+    "openai",
+    "msgpack"
+   ],
+   "seconds": 0.071,
+   "bfs_agrees": true
+  },
+  {
+   "id": "werkzeug-2.1.0-s1",
+   "culprit": "werkzeug",
+   "n_failing": 20,
+   "releases_in_window": 780,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 40,
+    "popular": 7
+   },
+   "top3": [
+    "werkzeug",
+    "click",
+    "flask"
+   ],
+   "seconds": 0.063,
+   "bfs_agrees": true
+  },
+  {
+   "id": "werkzeug-2.1.0-s2",
+   "culprit": "werkzeug",
+   "n_failing": 13,
+   "releases_in_window": 811,
+   "ranks": {
+    "f1": 6,
+    "coverage": 1,
+    "newest": 69,
+    "popular": 7
+   },
+   "top3": [
+    "werkzeug",
+    "click",
+    "flask"
+   ],
+   "seconds": 0.061,
+   "bfs_agrees": true
+  },
+  {
+   "id": "werkzeug-2.1.0-s3",
+   "culprit": "werkzeug",
+   "n_failing": 29,
+   "releases_in_window": 823,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 76,
+    "popular": 6
+   },
+   "top3": [
+    "werkzeug",
+    "flask",
+    "click"
+   ],
+   "seconds": 0.056,
+   "bfs_agrees": true
+  },
+  {
+   "id": "jinja2-3.1.0-s1",
+   "culprit": "jinja2",
+   "n_failing": 45,
+   "releases_in_window": 1289,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 41,
+    "popular": 3
+   },
+   "top3": [
+    "jinja2",
+    "tqdm",
+    "itsdangerous"
+   ],
+   "seconds": 0.049,
+   "bfs_agrees": true
+  },
+  {
+   "id": "jinja2-3.1.0-s2",
+   "culprit": "jinja2",
+   "n_failing": 45,
+   "releases_in_window": 1291,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 54,
+    "popular": 3
+   },
+   "top3": [
+    "jinja2",
+    "tqdm",
+    "boto3"
+   ],
+   "seconds": 0.058,
+   "bfs_agrees": true
+  },
+  {
+   "id": "jinja2-3.1.0-s3",
+   "culprit": "jinja2",
+   "n_failing": 48,
+   "releases_in_window": 1288,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 33,
+    "popular": 3
+   },
+   "top3": [
+    "jinja2",
+    "tqdm",
+    "boto3"
+   ],
+   "seconds": 0.073,
+   "bfs_agrees": true
+  },
+  {
+   "id": "sqlalchemy-2.0.0-s1",
+   "culprit": "sqlalchemy",
+   "n_failing": 39,
+   "releases_in_window": 727,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 38,
+    "popular": 5
+   },
+   "top3": [
+    "sqlalchemy",
+    "pydantic-core",
+    "pathspec"
+   ],
+   "seconds": 0.053,
+   "bfs_agrees": true
+  },
+  {
+   "id": "sqlalchemy-2.0.0-s2",
+   "culprit": "sqlalchemy",
+   "n_failing": 45,
+   "releases_in_window": 722,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 57,
+    "popular": 5
+   },
+   "top3": [
+    "sqlalchemy",
+    "pydantic-core",
+    "openai"
+   ],
+   "seconds": 0.06,
+   "bfs_agrees": true
+  },
+  {
+   "id": "sqlalchemy-2.0.0-s3",
+   "culprit": "sqlalchemy",
+   "n_failing": 45,
+   "releases_in_window": 722,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 58,
+    "popular": 5
+   },
+   "top3": [
+    "sqlalchemy",
+    "pydantic-core",
+    "sqlglot"
+   ],
+   "seconds": 0.059,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pyyaml-6.0-s1",
+   "culprit": "pyyaml",
+   "n_failing": 46,
+   "releases_in_window": 1202,
+   "ranks": {
+    "f1": 2,
+    "coverage": 1,
+    "newest": 297,
+    "popular": 4
+   },
+   "top3": [
+    "pyyaml",
+    "idna",
+    "wrapt"
+   ],
+   "seconds": 0.081,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pyyaml-6.0-s2",
+   "culprit": "pyyaml",
+   "n_failing": 45,
+   "releases_in_window": 1232,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 228,
+    "popular": 5
+   },
+   "top3": [
+    "pyyaml",
+    "idna",
+    "charset-normalizer"
+   ],
+   "seconds": 0.096,
+   "bfs_agrees": true
+  },
+  {
+   "id": "pyyaml-6.0-s3",
+   "culprit": "pyyaml",
+   "n_failing": 52,
+   "releases_in_window": 1245,
+   "ranks": {
+    "f1": 2,
+    "coverage": 1,
+    "newest": 354,
+    "popular": 4
+   },
+   "top3": [
+    "pyyaml",
+    "idna",
+    "httpx"
+   ],
+   "seconds": 0.104,
+   "bfs_agrees": true
+  },
+  {
+   "id": "importlib-metadata-5.0.0-s1",
+   "culprit": "importlib-metadata",
+   "n_failing": 44,
+   "releases_in_window": 380,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 21,
+    "popular": 4
+   },
+   "top3": [
+    "importlib-metadata",
+    "pydantic-core",
+    "boto3"
+   ],
+   "seconds": 0.049,
+   "bfs_agrees": true
+  },
+  {
+   "id": "importlib-metadata-5.0.0-s2",
+   "culprit": "importlib-metadata",
+   "n_failing": 46,
+   "releases_in_window": 380,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 21,
+    "popular": 4
+   },
+   "top3": [
+    "importlib-metadata",
+    "pydantic-core",
+    "bc-detect-secrets"
+   ],
+   "seconds": 0.047,
+   "bfs_agrees": true
+  },
+  {
+   "id": "importlib-metadata-5.0.0-s3",
+   "culprit": "importlib-metadata",
+   "n_failing": 53,
+   "releases_in_window": 378,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 25,
+    "popular": 5
+   },
+   "top3": [
+    "importlib-metadata",
+    "pydantic-core",
+    "pytz"
+   ],
+   "seconds": 0.053,
+   "bfs_agrees": true
+  },
+  {
+   "id": "packaging-22.0-s1",
+   "culprit": "packaging",
+   "n_failing": 53,
+   "releases_in_window": 776,
+   "ranks": {
+    "f1": 7,
+    "coverage": 1,
+    "newest": 17,
+    "popular": 2
+   },
+   "top3": [
+    "packaging",
+    "certifi",
+    "platformdirs"
+   ],
+   "seconds": 0.1,
+   "bfs_agrees": true
+  },
+  {
+   "id": "packaging-22.0-s2",
+   "culprit": "packaging",
+   "n_failing": 51,
+   "releases_in_window": 776,
+   "ranks": {
+    "f1": 4,
+    "coverage": 1,
+    "newest": 17,
+    "popular": 2
+   },
+   "top3": [
+    "packaging",
+    "certifi",
+    "importlib-resources"
+   ],
+   "seconds": 0.081,
+   "bfs_agrees": true
+  },
+  {
+   "id": "packaging-22.0-s3",
+   "culprit": "packaging",
+   "n_failing": 48,
+   "releases_in_window": 782,
+   "ranks": {
+    "f1": 8,
+    "coverage": 1,
+    "newest": 69,
+    "popular": 2
+   },
+   "top3": [
+    "packaging",
+    "certifi",
+    "botocore"
+   ],
+   "seconds": 0.083,
+   "bfs_agrees": true
+  },
+  {
+   "id": "httpx-0.28.0-s1",
+   "culprit": "httpx",
+   "n_failing": 49,
+   "releases_in_window": 960,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 58,
+    "popular": 4
+   },
+   "top3": [
+    "httpx",
+    "pyjwt",
+    "tomli"
+   ],
+   "seconds": 0.072,
+   "bfs_agrees": true
+  },
+  {
+   "id": "httpx-0.28.0-s2",
+   "culprit": "httpx",
+   "n_failing": 48,
+   "releases_in_window": 944,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 68,
+    "popular": 4
+   },
+   "top3": [
+    "httpx",
+    "cryptography",
+    "pyjwt"
+   ],
+   "seconds": 0.065,
+   "bfs_agrees": true
+  },
+  {
+   "id": "httpx-0.28.0-s3",
+   "culprit": "httpx",
+   "n_failing": 46,
+   "releases_in_window": 944,
+   "ranks": {
+    "f1": 1,
+    "coverage": 1,
+    "newest": 68,
+    "popular": 4
+   },
+   "top3": [
+    "httpx",
+    "pyjwt",
+    "tomli"
+   ],
+   "seconds": 0.069,
+   "bfs_agrees": true
+  }
+ ]
+}
