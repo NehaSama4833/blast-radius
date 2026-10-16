@@ -1,0 +1,967 @@
+[
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-easy-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "billing-svc"
+    ],
+    "seed": 587927,
+    "split": "extended",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-easy-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "partner-api"
+    ],
+    "seed": 714168,
+    "split": "extended",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-easy-3",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "notif-worker"
+    ],
+    "seed": 310860,
+    "split": "extended",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-easy-4",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "notif-worker"
+    ],
+    "seed": 103324,
+    "split": "extended",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-easy-5",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "reporting-svc"
+    ],
+    "seed": 999875,
+    "split": "extended",
+    "tier": "easy",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-medium-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "kafka"
+    ],
+    "seed": 282209,
+    "split": "extended",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-medium-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 762109,
+    "split": "extended",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-medium-3",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 3385,
+    "split": "extended",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-acme-medium-4",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 590758,
+    "split": "extended",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-medium-5",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 672658,
+    "split": "extended",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-medium-6",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "ledger-db"
+    ],
+    "seed": 413558,
+    "split": "extended",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-medium-7",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 452020,
+    "split": "extended",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-acme-medium-8",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 63307,
+    "split": "extended",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-medium-9",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "kafka"
+    ],
+    "seed": 739585,
+    "split": "extended",
+    "tier": "medium",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-acme-hard-1",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 234106,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-hard-2",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 328919,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-hard-3",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 264247,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-hard-4",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 156512,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-acme-hard-5",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 468100,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-hard-6",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db"
+    ],
+    "seed": 298575,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-hard-7",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "fraud-store"
+    ],
+    "seed": 166827,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-hard-8",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db"
+    ],
+    "seed": 358508,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-hard-9",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 487437,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-hard-10",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db"
+    ],
+    "seed": 634783,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-hard-11",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "redis-cache"
+    ],
+    "seed": 926027,
+    "split": "extended",
+    "tier": "hard",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-acme-ambiguous-1",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db",
+      "kafka"
+    ],
+    "seed": 95885,
+    "split": "extended",
+    "tier": "ambiguous",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-ambiguous-2",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "kafka",
+      "fraud-store"
+    ],
+    "seed": 576070,
+    "split": "extended",
+    "tier": "ambiguous",
+    "world": "acme"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-acme-ambiguous-3",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db",
+      "kafka"
+    ],
+    "seed": 749394,
+    "split": "extended",
+    "tier": "ambiguous",
+    "world": "acme"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-acme-ambiguous-4",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db",
+      "kafka"
+    ],
+    "seed": 427740,
+    "split": "extended",
+    "tier": "ambiguous",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-acme-ambiguous-5",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "ledger-db",
+      "kafka"
+    ],
+    "seed": 193701,
+    "split": "extended",
+    "tier": "ambiguous",
+    "world": "acme"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-globex-easy-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "driver-bff"
+    ],
+    "seed": 260550,
+    "split": "extended",
+    "tier": "easy",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-globex-easy-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "driver-bff"
+    ],
+    "seed": 461638,
+    "split": "extended",
+    "tier": "easy",
+    "world": "globex"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-globex-easy-3",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "customer-portal"
+    ],
+    "seed": 535995,
+    "split": "extended",
+    "tier": "easy",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-globex-easy-4",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "driver-bff"
+    ],
+    "seed": 344209,
+    "split": "extended",
+    "tier": "easy",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-globex-medium-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 959016,
+    "split": "extended",
+    "tier": "medium",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-globex-medium-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 512410,
+    "split": "extended",
+    "tier": "medium",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-globex-medium-3",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 827936,
+    "split": "extended",
+    "tier": "medium",
+    "world": "globex"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-globex-medium-4",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 720231,
+    "split": "extended",
+    "tier": "medium",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-globex-medium-5",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 687671,
+    "split": "extended",
+    "tier": "medium",
+    "world": "globex"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-globex-medium-6",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 501235,
+    "split": "extended",
+    "tier": "medium",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-globex-hard-1",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 560307,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-globex-hard-2",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 205484,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-globex-hard-3",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 215033,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-globex-hard-4",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 1804,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-globex-hard-5",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 65006,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-globex-hard-6",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 722693,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-globex-hard-7",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 42979,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-globex-hard-8",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 192993,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-globex-hard-9",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "telemetry-store"
+    ],
+    "seed": 316602,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-globex-hard-10",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "geo-cache"
+    ],
+    "seed": 85834,
+    "split": "extended",
+    "tier": "hard",
+    "world": "globex"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-boutique-easy-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "frontend"
+    ],
+    "seed": 15508,
+    "split": "extended",
+    "tier": "easy",
+    "world": "boutique"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-boutique-easy-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "frontend"
+    ],
+    "seed": 192355,
+    "split": "extended",
+    "tier": "easy",
+    "world": "boutique"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-boutique-medium-1",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "redis-cart"
+    ],
+    "seed": 822823,
+    "split": "extended",
+    "tier": "medium",
+    "world": "boutique"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-boutique-medium-2",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "redis-cart"
+    ],
+    "seed": 782787,
+    "split": "extended",
+    "tier": "medium",
+    "world": "boutique"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-boutique-medium-3",
+    "noise": {
+      "distractors": 0,
+      "flaky": false,
+      "missing": false
+    },
+    "roots": [
+      "redis-cart"
+    ],
+    "seed": 917828,
+    "split": "extended",
+    "tier": "medium",
+    "world": "boutique"
+  },
+  {
+    "change_kind": "code",
+    "id": "ext-boutique-hard-1",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "redis-cart"
+    ],
+    "seed": 571284,
+    "split": "extended",
+    "tier": "hard",
+    "world": "boutique"
+  },
+  {
+    "change_kind": "config",
+    "id": "ext-boutique-hard-2",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "currencyservice"
+    ],
+    "seed": 578892,
+    "split": "extended",
+    "tier": "hard",
+    "world": "boutique"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-boutique-hard-3",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "currencyservice"
+    ],
+    "seed": 415209,
+    "split": "extended",
+    "tier": "hard",
+    "world": "boutique"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-boutique-hard-4",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "currencyservice"
+    ],
+    "seed": 888068,
+    "split": "extended",
+    "tier": "hard",
+    "world": "boutique"
+  },
+  {
+    "change_kind": "infra",
+    "id": "ext-boutique-hard-5",
+    "noise": {
+      "distractors": 2,
+      "flaky": true,
+      "missing": true
+    },
+    "roots": [
+      "currencyservice"
+    ],
+    "seed": 51289,
+    "split": "extended",
+    "tier": "hard",
+    "world": "boutique"
+  }
+]

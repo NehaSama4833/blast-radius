@@ -88,13 +88,13 @@ CONDITIONS = {"graph-rules": run_graph_rules, "graph-coverage-only": run_graph_c
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", choices=["dev", "test"], default="dev")
+    ap.add_argument("--split", choices=["dev", "test", "extended"], default="dev")
     ap.add_argument("--condition", choices=sorted(CONDITIONS), default="graph-rules")
     ap.add_argument("--final", action="store_true", help="required to touch the held-out test split")
     ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
-    if a.split == "test" and not a.final:
-        sys.exit("refusing to run the held-out test split without --final (it must not be used for tuning)")
+    if a.split in ("test", "extended") and not a.final:
+        sys.exit(f"refusing to run the held-out {a.split} split without --final (it must not be used for tuning)")
     scored = []
     for spec in load_specs(a.split):
         truth, res = CONDITIONS[a.condition](spec)

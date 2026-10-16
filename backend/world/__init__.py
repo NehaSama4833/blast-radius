@@ -1,10 +1,10 @@
 from functools import lru_cache
 import copy
 
-from backend.world import acme, globex
+from backend.world import acme, boutique, globex
 from backend.world.history import build_world
 
-CONFIGS = {"acme": acme.CONFIG, "globex": globex.CONFIG}
+CONFIGS = {"acme": acme.CONFIG, "globex": globex.CONFIG, "boutique": boutique.CONFIG}
 
 
 @lru_cache(maxsize=None)

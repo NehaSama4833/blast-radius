@@ -74,6 +74,38 @@ def generate_specs():
     return specs
 
 
+# Extended held-out split: added Oct 16, frozen BEFORE any held-out run (test or extended).
+# Same failure model, a new seed, three worlds; boutique is the real Online Boutique topology (see world/boutique.py).
+PLAN_EXT = {
+    "acme": {"easy": 5, "medium": 9, "hard": 11, "ambiguous": 5},
+    "globex": {"easy": 4, "medium": 6, "hard": 10},            # globex has no two-cause pair that fits the rules
+    "boutique": {"easy": 2, "medium": 3, "hard": 5},
+}
+
+
+def _roots_ext(world, tier):
+    r = _roots_for(world, tier)
+    if r or tier != "hard":
+        return r
+    svcs = topo.svc_map(world)          # small worlds: any silent service that takes 2+ monitored services down
+    return sorted(n for n, s in svcs.items() if not s["monitored"]
+                  and sum(1 for d in topo.sync_dependents(world, n) if svcs[d]["monitored"]) >= 2)
+
+
+def generate_extended():
+    rng = random.Random(20261016)
+    out = []
+    for wname, plan in PLAN_EXT.items():
+        w = get_world(wname)
+        for tier, count in plan.items():
+            for k in range(count):
+                roots = rng.choice(_ambiguous_pairs(w)) if tier == "ambiguous" else [rng.choice(_roots_ext(w, tier))]
+                noise = HARD_NOISE if tier in ("hard", "ambiguous") else dict(flaky=False, missing=False, distractors=0)
+                out.append(dict(id=f"ext-{wname}-{tier}-{k + 1}", split="extended", tier=tier, world=wname, roots=roots,
+                                change_kind=rng.choice(failure.CHANGE_KINDS), noise=noise, seed=rng.randint(1, 10**6)))
+    return out
+
+
 def materialize(spec):
     """Re-run the failure model for a spec. Returns (world, Outcome)."""
     world = get_world(spec["world"])
@@ -92,6 +124,7 @@ def materialize(spec):
 def write_specs():
     SCENARIO_DIR.mkdir(parents=True, exist_ok=True)
     specs = generate_specs()
+    specs["extended"] = generate_extended()
     for split, items in specs.items():
         (SCENARIO_DIR / f"{split}.json").write_text(json.dumps(items, indent=2, sort_keys=True) + "\n")
     return specs

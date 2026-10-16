@@ -76,3 +76,14 @@ def test_dev_and_test_scenarios_are_distinct():
     assert not ids
     seeds = {s["seed"] for s in load_specs("dev")} & {s["seed"] for s in load_specs("test")}
     assert not seeds
+
+
+def test_extended_split_frozen_and_valid():
+    """The extended held-out split (60 scenarios, 3 worlds) must equal what its generator produces."""
+    from backend.world.scenarios import generate_extended
+    ext = load_specs("extended")
+    assert ext == generate_extended() and len(ext) == 60
+    assert {s["world"] for s in ext} == {"acme", "globex", "boutique"}
+    for s in ext:
+        w, o = materialize(s)
+        assert o.alerts and set(o.truth["root_causes"]) == set(s["roots"])
