@@ -9,7 +9,7 @@ from backend.graph.db import copy_graph, drop_graph, get_db
 
 PREFIX = "sbx_"
 TTL_S = 2 * 3600
-MAX_SANDBOXES = 50
+MAX_SANDBOXES = 150
 
 
 class SandboxLimit(RuntimeError):
@@ -28,11 +28,24 @@ def _shift_times(g, delta):
         g.query(f"MATCH (n:{label}) SET {sets}", {"d": int(delta)})
 
 
+def _make_room(now):
+    """At the cap, recycle the oldest sandbox instead of turning a visitor away."""
+    cleanup_expired(now)
+    names = list_sandboxes()
+    if len(names) < MAX_SANDBOXES:
+        return
+    from backend.graph.db import get_graph
+    ages = []
+    for n in names:
+        r = get_graph(n).query("MATCH (m:Meta) RETURN m.created_at").result_set
+        ages.append((r[0][0] if r else 0, n))
+    for _, n in sorted(ages)[: len(names) - MAX_SANDBOXES + 1]:
+        drop_graph(n)
+
+
 def create_sandbox(template: str, now=None):
     now = int(now if now is not None else time.time())
-    cleanup_expired(now)
-    if len(list_sandboxes()) >= MAX_SANDBOXES:
-        raise SandboxLimit("sandbox limit reached, try again later")
+    _make_room(now)
     name = PREFIX + secrets.token_hex(4)
     g = copy_graph(template, name)
     loaded = g.query("MATCH (m:Meta) RETURN m.loaded_at").result_set
@@ -62,9 +75,7 @@ def create_from_world(world, now=None):
     from backend.graph.db import get_graph
     from backend.world.loader import load_world
     now = int(now if now is not None else time.time())
-    cleanup_expired(now)
-    if len(list_sandboxes()) >= MAX_SANDBOXES:
-        raise SandboxLimit("sandbox limit reached, try again later")
+    _make_room(now)
     name = PREFIX + secrets.token_hex(4)
     g = get_graph(name)
     load_world(g, world, now=now)

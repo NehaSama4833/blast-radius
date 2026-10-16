@@ -45,7 +45,18 @@ export default function App() {
   const start = useCallback(async (w: string) => {
     setErr(""); queue.current = []; setEvents([]); setResult(null); setFocus(null); setProof([]); setAlerting([]); setLoading(true);
     try {
+      // reuse this browser's sandbox for the world if it is still alive (saves a GRAPH.COPY and keeps the cap free)
+      let saved = "";
+      try { saved = localStorage.getItem(`br_sbx_${w}`) ?? ""; } catch { /* storage may be blocked */ }
+      if (saved) {
+        try {
+          const g = await getGraph(saved);
+          setSbx(saved); setWorld(w); setGraph(g); setAlerting(g.alerting);
+          return;
+        } catch { /* expired: make a new one */ }
+      }
       const s = await newSandbox(w);
+      try { localStorage.setItem(`br_sbx_${w}`, s.sandbox); } catch { /* ignore */ }
       setSbx(s.sandbox); setWorld(w);
       setGraph(await getGraph(s.sandbox));
     } catch (e) { setErr((e as Error).message); } finally { setLoading(false); }
@@ -112,6 +123,7 @@ export default function App() {
         <h1><span className="logo">◉</span> Blast Radius</h1>
         <label>World
           <select aria-label="World" value={world} onChange={e => e.target.value === "__import" ? setShowImport(true) : start(e.target.value)}>
+            {!world && <option value="">loading…</option>}
             {worlds.map(w => <option key={w}>{w}</option>)}
             {world === "imported" && <option value="imported">your system</option>}
             <option value="__import">+ your docker-compose…</option>

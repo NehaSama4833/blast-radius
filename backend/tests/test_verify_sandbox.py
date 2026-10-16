@@ -95,11 +95,15 @@ def test_sandbox_cap(monkeypatch):
     drop_graph(tmpl)
     from backend.world.loader import load_world
     load_world(get_graph(tmpl), get_world("globex"), now=NOW)
+    for n in sandbox.list_sandboxes():          # start from a clean slate
+        drop_graph(n)
     monkeypatch.setattr(sandbox, "MAX_SANDBOXES", 2)
-    made = [sandbox.create_sandbox(tmpl, now=NOW) for _ in range(2)]
+    made = [sandbox.create_sandbox(tmpl, now=NOW + i) for i in range(2)]
     try:
-        with pytest.raises(sandbox.SandboxLimit):
-            sandbox.create_sandbox(tmpl, now=NOW)
+        third = sandbox.create_sandbox(tmpl, now=NOW + 2)          # at the cap: the oldest is recycled, nobody is refused
+        made.append(third)
+        live = sandbox.list_sandboxes()
+        assert len(live) == 2 and made[0] not in live and third in live
     finally:
         for n in made:
             drop_graph(n)

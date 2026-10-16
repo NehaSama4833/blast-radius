@@ -55,8 +55,10 @@ class Session:
     proposed: list = field(default_factory=list)
     _n: int = 0
     _lock: object = field(default_factory=threading.Lock, repr=False)
-    listener: object = field(default=None, repr=False)
-    numbers: dict = field(default_factory=lambda: {a: set() for a in AGENTS})  # every number each agent's tool results contained     # optional fn(agent, tool, params, cites): lets the UI light up what each agent reads
+    listener: object = field(default=None, repr=False)     # optional fn(agent, tool, params, cites): lets the UI light up what each agent reads
+    numbers: dict = field(default_factory=lambda: {a: set() for a in AGENTS})  # every number each agent's tool results contained
+    _version: object = field(default=None, repr=False)     # graph version, read once per investigation
+    _hyps: set = field(default_factory=set, repr=False)    # hypothesis ids known to belong to this investigation
 
     # ---- reading ---------------------------------------------------------------------------------------------
     def call(self, agent, tool, args=None):
@@ -86,14 +88,17 @@ class Session:
         self.graph.query("""UNWIND $rows AS r MATCH (i:Investigation {id:$inv}), (s:Service {name:r.service})
                             CREATE (h:Hypothesis {id:r.id, rank:r.rank, structural_score:r.score, status:'open'}),
                                    (i)-[:CONSIDERS]->(h), (h)-[:ABOUT]->(s)""", {"rows": rows, "inv": self.inv_id})
+        self._hyps.update(r["id"] for r in rows)
         return [r["id"] for r in rows]
 
     def add_finding(self, agent, hypothesis_id, text, supports, cites, weight=1.0):
         self._agent(agent)
         kind = FINDING_KIND[agent]
-        if not self.graph.query("MATCH (:Investigation {id:$i})-[:CONSIDERS]->(h:Hypothesis {id:$h}) RETURN count(h)",
-                                {"i": self.inv_id, "h": hypothesis_id}).result_set[0][0]:
-            raise BoardError(f"{hypothesis_id} is not a hypothesis of {self.inv_id}")
+        if hypothesis_id not in self._hyps:                  # checked against the graph once, then remembered
+            if not self.graph.query("MATCH (:Investigation {id:$i})-[:CONSIDERS]->(h:Hypothesis {id:$h}) RETURN count(h)",
+                                    {"i": self.inv_id, "h": hypothesis_id}).result_set[0][0]:
+                raise BoardError(f"{hypothesis_id} is not a hypothesis of {self.inv_id}")
+            self._hyps.add(hypothesis_id)
         with self._lock:
             self._check_cites(agent, cites)
             self._n += 1
@@ -218,16 +223,21 @@ class Session:
     def _receipt(self, agent, cites):
         cites = set(cites)
         used = [c for c in self.calls[agent] if cites & set(c["cites"])]
-        meta = self.graph.query("MATCH (m:Meta) RETURN m.world, m.loaded_at").result_set
-        version = f"{meta[0][0]}@{meta[0][1]}" if meta else "unknown"
+        if self._version is None:                            # one round trip per investigation, not per finding
+            meta = self.graph.query("MATCH (m:Meta) RETURN m.world, m.loaded_at").result_set
+            self._version = f"{meta[0][0]}@{meta[0][1]}" if meta else "unknown"
+        version = self._version
         return json.dumps(dict(graph_version=version, calls=[dict(tool=c["tool"], params=c["params"]) for c in used],
                                nodes_read=sorted(cites)), sort_keys=True)
 
     def _link_cites(self, finding_id, cites):
+        by_label = {}
         for c in sorted(set(cites)):
             label, val = c.split(":", 1)          # label is checked against KEY_PROP, so it is safe to put in the query
-            self.graph.query(f"MATCH (f:Finding {{id:$fid}}), (n:{label} {{{KEY_PROP[label]}:$v}}) CREATE (f)-[:CITES]->(n)",
-                             {"fid": finding_id, "v": val})
+            by_label.setdefault(label, []).append(val)
+        for label, vals in by_label.items():      # one query per label, not per cite (matters on a remote database)
+            self.graph.query(f"MATCH (f:Finding {{id:$fid}}) UNWIND $vs AS v MATCH (n:{label} {{{KEY_PROP[label]}:v}}) CREATE (f)-[:CITES]->(n)",
+                             {"fid": finding_id, "vs": vals})
 
 
 def start_investigation(graph, alerting, model="stub", now=None):
@@ -236,8 +246,7 @@ def start_investigation(graph, alerting, model="stub", now=None):
     n = graph.query("MATCH (i:Investigation) RETURN count(i)").result_set[0][0] + 1
     inv = f"inv-{n}"
     graph.query("CREATE (:Investigation {id:$id, ts:$ts, status:'open', model:$m, tokens:0, duration_ms:0})", {"id": inv, "ts": now, "m": model})
-    for a in AGENTS:
-        graph.query("MERGE (:Agent {name:$n})", {"n": a})
+    graph.query("UNWIND $names AS n MERGE (:Agent {name:n})", {"names": list(AGENTS)})
     graph.query("""MATCH (i:Investigation {id:$id}) UNWIND $alerting AS name
                    MATCH (a:Alert)-[:ON]->(:Service {name:name}) WHERE a.ts <= $now AND a.resolved IS NULL
                    MERGE (i)-[:TRIGGERED_BY]->(a)""", {"id": inv, "alerting": sorted(set(alerting)), "now": now})
