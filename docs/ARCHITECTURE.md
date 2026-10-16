@@ -180,6 +180,10 @@ Everything here is tested with a scripted fake model. It has NOT been run agains
 
 **Scale.** `rank_root_causes` now visits candidates by coverage and stops once a candidate's best possible score (coverage with perfect precision) is below the current top-k, which gives exactly the same top-k (tested on 36 random storms over three worlds) with far fewer expensive blast-radius walks. Results in docs/SCALE.md.
 
+## 21. The Auditor (`backend/agents/auditor.py`)
+
+After the Lead decides, the simulation result and the fact-check are stored on the Decision node. The Auditor then reads only the graph (never the team's memory or transcripts) and checks: the Decision links to the blamed service; the accepted hypothesis has support from at least one specialist (two for high confidence, not counting People); a blamed deploy went to that service before the first alert; the simulated fix clears at least 70% of alerts; the fact-check found nothing; an abstention is low confidence and considered alternatives. It writes `(:Agent {name:'Auditor'})-[:WROTE]->(:Audit {verdict, checks})-[:AUDITS]->(:Decision)`. It cannot change the verdict; disagreement is shown to the human.
+
 ## Not built yet
 
 Ripple in the web screen, real-model tuning on dev scenarios, re-recording the replay from a real run, the final benchmark on the held-out test split, BENCHMARK.md, the blog and demo script.
