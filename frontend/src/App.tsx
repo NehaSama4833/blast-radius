@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { chaos, getGraph, getWorlds, investigate, lateAlert, newSandbox, whatIf } from "./api";
+import { chaos, getGraph, getWorlds, investigate, lateAlert, newSandbox, waitReady, whatIf } from "./api";
 import type { WhatIfData } from "./api";
 import Graph from "./Graph";
 import Lanes from "./Lanes";
@@ -32,6 +32,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [running, setRunning] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [wake, setWake] = useState("");
   const queue = useRef<Ev[]>([]);
   const [learned, setLearned] = useState<string[]>([]);
   const [resolved, setResolved] = useState(false);
@@ -63,8 +64,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    getWorlds().then(w => { setWorlds(w.worlds.map(x => x.name)); setKinds(w.change_kinds); setKind(w.change_kinds[0]); start(w.worlds[0].name); })
-      .catch(e => setErr(e.message));
+    waitReady(m => setWake(m)).then(() => { setWake(""); return getWorlds(); }).then(w => { setWorlds(w.worlds.map(x => x.name)); setKinds(w.change_kinds); setKind(w.change_kinds[0]); start(w.worlds[0].name); })
+      .catch(e => { setWake(""); setLoading(false); setErr(e.message); });
   }, [start]);
 
   // drain the event queue at a human pace
@@ -144,7 +145,8 @@ export default function App() {
       </header>
       {err && <div className="err" role="alert">{err}</div>}
       {events.some(e => e.replay) && <div className="notice" role="status">Showing a recorded replay: the live investigation limit for today was reached.</div>}
-      {loading && <div className="notice" role="status">Setting up your private copy of the company graph…</div>}
+      {wake && <div className="notice" role="status">{wake}</div>}
+      {loading && !wake && <div className="notice" role="status">Setting up your private copy of the company graph…</div>}
       <main>
         <section className="left">
           <Graph data={graph} alerting={alerting} focus={proof.length ? null : focus} cleared={cleared} onPick={pick} reads={reads} proof={proof} />

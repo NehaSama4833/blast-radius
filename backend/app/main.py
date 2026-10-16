@@ -19,7 +19,7 @@ from backend.agents.runner import run_investigation
 from backend.agents.llm_policy import LLMPolicy
 from backend.app.limits import DailyCap, RateLimiter
 from backend.graph import sandbox
-from backend.graph.db import get_graph
+from backend.graph.db import get_db, get_graph
 from backend.world import CONFIGS, failure, get_world, topology as topo
 from backend.world.history import CHANGE_KINDS
 from backend.world.loader import load_alerts, load_world
@@ -158,6 +158,20 @@ def health(db: int = 0):
     except Exception as e:
         return dict(ok=False, db="unreachable", error=type(e).__name__ + ": " + str(e)[:200])
     return dict(ok=True, worlds=WORLDS, db="ok", db_ms=round((time.time() - t) * 1000), sandboxes=n)
+
+
+@app.get("/api/ready")
+def ready():
+    """Readiness: the database answers. 200 when ready, 503 with a `state` the UI can show while it is not."""
+    from fastapi.responses import JSONResponse
+    t = time.time()
+    try:
+        get_db().connection.ping()
+    except Exception as e:
+        return JSONResponse(status_code=503, content=dict(ready=False, state="db_unavailable",
+                                                          hint="The graph database is not answering yet.",
+                                                          error=type(e).__name__))
+    return dict(ready=True, state="ready", db_ms=round((time.time() - t) * 1000))
 
 
 @app.get("/api/worlds")

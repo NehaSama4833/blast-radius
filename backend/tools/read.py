@@ -198,8 +198,11 @@ def lessons_for(graph, service) -> ToolResult:
 
 def critical_services(graph, limit=5) -> ToolResult:
     """Chokepoints (betweenness) and most depended-on services (PageRank)."""
-    bt = {n: s for n, s in rows(graph, """CALL algo.betweenness({nodeLabels:['Service'], relationshipTypes:['DEPENDS_ON']})
-                                          YIELD node, score RETURN node.name, score""")}
+    # exact betweenness over the graph's edges (FalkorDB's algo.betweenness samples sources: docs/FALKORDB_FINDINGS.md)
+    from backend.tools.centrality import betweenness
+    names = [r[0] for r in rows(graph, "MATCH (s:Service) RETURN s.name")]
+    edges = rows(graph, "MATCH (a:Service)-[:DEPENDS_ON]->(b:Service) RETURN a.name, b.name")
+    bt = betweenness(names, [tuple(e) for e in edges])
     pr = {n: s for n, s in rows(graph, """CALL algo.pageRank('Service','DEPENDS_ON') YIELD node, score RETURN node.name, score""")}
     ranked = sorted(bt, key=lambda n: (-bt[n], -pr.get(n, 0), n))[:int(limit)]
     items = [dict(service=n, betweenness=round(bt[n], 4), pagerank=round(pr.get(n, 0.0), 4)) for n in ranked]

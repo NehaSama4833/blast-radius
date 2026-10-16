@@ -178,3 +178,22 @@ def test_postmortem_from_graph(client):
     assert "Lesson saved to memory" in md and "Add monitoring to ledger-db" in md
     assert client.get(f"/api/postmortem/{sb}/inv-999").status_code == 404
     assert client.get(f"/api/postmortem/{sb}/../x").status_code in (400, 404)
+
+
+def test_ready_and_db_health(client):
+    r = client.get("/api/ready")
+    assert r.status_code == 200 and r.json()["ready"] is True
+    h = client.get("/api/health?db=1").json()
+    assert h["ok"] and h["db"] == "ok" and "sandboxes" in h
+    assert "db" not in client.get("/api/health").json()          # plain liveness never touches the database
+
+
+def test_ready_reports_db_down(client, monkeypatch):
+    class Dead:
+        class connection:
+            @staticmethod
+            def ping():
+                raise ConnectionError("down")
+    monkeypatch.setattr(main, "get_db", lambda: Dead)
+    r = client.get("/api/ready")
+    assert r.status_code == 503 and r.json()["state"] == "db_unavailable"
