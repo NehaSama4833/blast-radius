@@ -18,11 +18,13 @@ def ask(graph, question, client, model=None, max_steps=5):
     question = " ".join(str(question).split())[:300]
     if len(question) < 3:
         raise ValueError("ask a question")
-    seen, calls = set(), []
+    from backend.agents.faithful import check, numbers_in
+    seen, calls, nums = set(), [], set()
 
     def execute(name, args):
         res = call_tool(graph, name, args)
         seen.update(res.cites)
+        nums.update(numbers_in(res.data))
         calls.append(dict(tool=name, params=args))
         return json.dumps(dict(data=res.data, cite_ids=sorted(set(res.cites))), default=str)[:6000]
 
@@ -36,5 +38,7 @@ def ask(graph, question, client, model=None, max_steps=5):
     answer = str(out.get("answer") or "I could not answer that from the graph.")[:800]
     cites = [c for c in out.get("cites", []) if isinstance(c, str)]
     ok = [c for c in cites if c in seen]
-    return dict(answer=answer, cites=ok, rejected=len(cites) - len(ok), calls=calls, steps=steps,
+    names = [r[0] for r in graph.query("MATCH (s:Service) RETURN s.name").result_set]
+    faith = check(answer, seen, nums, names)
+    return dict(answer=answer, cites=ok, faithfulness=faith, rejected=len(cites) - len(ok), calls=calls, steps=steps,
                 services=sorted({c.split(":", 1)[1] for c in ok if c.startswith("Service:")}), tokens=usage["input"] + usage["output"])

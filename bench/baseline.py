@@ -53,4 +53,5 @@ def run_docs_agent(world, outcome, now, client=None, lead_model=None, max_steps=
     conf = out.get("confidence") if out.get("confidence") in ("high", "medium", "low") else "low"
     return dict(root_cause=rc, confidence=conf, hypotheses=[dict(service=s) for s in top3], blames_deploy=out.get("deploy_id"),
                 claims=dict(verified=ok, rejected=len(cites) - ok), duration_s=round(time.time() - t0, 3),
-                tokens=usage["input"] + usage["output"], usage=usage)
+                tokens=usage["input"] + usage["output"], usage=usage,
+                cost_usd=round((usage["input"] * 2.0 + usage["output"] * 10.0) / 1e6, 5))

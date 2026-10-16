@@ -20,7 +20,9 @@ def score_one(spec, truth, result):
         wrong_abstention=(abstained and not multi),
         confident_and_wrong=(not abstained and not multi and rc not in roots) or (not abstained and multi),
         invalid_citations=result["claims"]["rejected"], claims=result["claims"]["verified"] + result["claims"]["rejected"],
-        duration_s=result["duration_s"], tokens=result.get("tokens", 0))
+        duration_s=result["duration_s"], tokens=result.get("tokens", 0),
+        faith_flags=(len(result["faithfulness"]["verdict"]["flagged"]) + len(result["faithfulness"]["findings"]["flagged"]))
+        if result.get("faithfulness") else None, cost_usd=result.get("cost_usd"))
 
 
 def _rate(rows, key):
@@ -40,7 +42,9 @@ def aggregate(scored):
                       wrong_abstentions=sum(r["wrong_abstention"] for r in single), n_single=len(single),
                       correct_abstentions=f"{sum(r['correct_abstention'] for r in amb)}/{len(amb)}" if amb else None,
                       invalid_citations=sum(r["invalid_citations"] for r in rows), claims=sum(r["claims"] for r in rows),
-                      mean_duration_s=round(sum(r["duration_s"] for r in rows) / len(rows), 2), tokens=sum(r["tokens"] for r in rows))
+                      mean_duration_s=round(sum(r["duration_s"] for r in rows) / len(rows), 2), tokens=sum(r["tokens"] for r in rows),
+                      faith_flags=sum(r["faith_flags"] or 0 for r in rows) if any(r.get("faith_flags") is not None for r in rows) else None,
+                      cost_usd=round(sum(r["cost_usd"] or 0 for r in rows), 4) if any(r.get("cost_usd") is not None for r in rows) else None)
     # calibration: are 'high' verdicts right more often than 'medium'/'low'?
     cal = {}
     for lvl in ("high", "medium", "low"):

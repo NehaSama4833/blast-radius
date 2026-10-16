@@ -7,6 +7,8 @@ An `Investigation` owns Hypothesis and Finding nodes. Agents never see each othe
   * receipts: every Finding/Decision stores the tool calls (tool + parameters) and the graph version it came from.
 """
 import json
+
+from backend.agents.faithful import check, check_many, numbers_in
 import threading
 import time
 from dataclasses import dataclass, field
@@ -53,7 +55,8 @@ class Session:
     proposed: list = field(default_factory=list)
     _n: int = 0
     _lock: object = field(default_factory=threading.Lock, repr=False)
-    listener: object = field(default=None, repr=False)     # optional fn(agent, tool, params, cites): lets the UI light up what each agent reads
+    listener: object = field(default=None, repr=False)
+    numbers: dict = field(default_factory=lambda: {a: set() for a in AGENTS})  # every number each agent's tool results contained     # optional fn(agent, tool, params, cites): lets the UI light up what each agent reads
 
     # ---- reading ---------------------------------------------------------------------------------------------
     def call(self, agent, tool, args=None):
@@ -64,8 +67,10 @@ class Session:
             res = verify_mitigation(self.graph, **(args or {}))
         else:
             res = call_tool(self.graph, tool, args)
+        nums = numbers_in(res.data)
         with self._lock:
             self.seen[agent].update(res.cites)
+            self.numbers[agent] |= nums
             self.calls[agent].append(dict(res.receipt, cites=sorted(set(res.cites))))
         if self.listener:
             try:
@@ -170,6 +175,26 @@ class Session:
                 if key is not None:
                     self.seen["Lead"].add(f"{label}:{key}")
         return sorted(board.values(), key=lambda h: h["rank"])
+
+    def service_names(self):
+        if not hasattr(self, "_svc_names"):
+            self._svc_names = [r[0] for r in self.graph.query("MATCH (s:Service) RETURN s.name").result_set]
+        return self._svc_names
+
+    def faithfulness(self, reasons, board):
+        """Check the verdict's reasons (Lead) and every finding's text (its own agent) against what was really read."""
+        names = self.service_names()
+        given = {f"Service:{a}" for a in self.alerting}            # every agent is told which services are alerting
+        given_nums = {str(len(self.alerting))}
+        all_nums = set().union(*self.numbers.values()) | given_nums
+        verdict = check_many(reasons, self.seen["Lead"] | given, all_nums, names)
+        findings = dict(names=0, numbers=0, flagged=[])
+        for b in board:
+            for f in b["findings"]:
+                r = check(f["text"], self.seen.get(f["agent"], set()) | given, self.numbers.get(f["agent"], set()) | given_nums, names)
+                findings["names"] += r["names"]; findings["numbers"] += r["numbers"]
+                findings["flagged"] += [f"{f['agent']}: {x}" for x in r["flagged"]]
+        return dict(verdict=verdict, findings=findings)
 
     def verification(self):
         return dict(verified=self.claims_ok, rejected=self.claims_rejected)

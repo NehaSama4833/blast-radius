@@ -80,3 +80,4 @@ main>section{min-width:0}.right{overflow-x:hidden}
 .verdict,.board,.hero,.lanes,.ask,.whatif{min-width:0;overflow-wrap:anywhere}
 @media(max-width:900px){main{display:flex;flex-direction:column;overflow:auto}.left{min-height:380px;border-right:none;border-bottom:1px solid var(--line)}
   .right{overflow:visible}.app{height:auto;min-height:100vh}}
+.faith{font-size:12px;margin:6px 0}.faith.ok{color:var(--green)}.faith.bad{color:var(--amber)}.faith ul{margin:4px 0 0 16px;padding:0}

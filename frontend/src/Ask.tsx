@@ -34,6 +34,9 @@ export default function Ask({ sandbox, onProof, disabled, nodes }: { sandbox: st
             <div className="r-h">Receipt · {a.calls.length} read-only graph quer{a.calls.length === 1 ? "y" : "ies"} · {a.cites.length} citation{a.cites.length === 1 ? "" : "s"} checked{a.rejected ? ` · ${a.rejected} invented citation(s) dropped` : ""}</div>
             {a.calls.map((c, i) => <div key={i}><code>{c.tool}({Object.entries(c.params).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(", ")})</code></div>)}
             <div className="r-nodes">{a.cites.map(c => <code key={c}>{c}</code>)}</div>
+            {a.faithfulness && (a.faithfulness.flagged.length
+              ? <div className="faith bad">⚠ {a.faithfulness.flagged.join("; ")}</div>
+              : <div className="faith ok">✓ Fact-checked: {a.faithfulness.names} names and {a.faithfulness.numbers} numbers all appear in the tool results.</div>)}
           </div>
         </div>
       )}

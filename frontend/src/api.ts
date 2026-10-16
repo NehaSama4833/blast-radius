@@ -17,7 +17,7 @@ export const postToDiscord = (sandbox: string, investigation: string) => post("/
 
 export type WhatIfData = { service: string; failing_now: string[]; at_risk: string[]; features: string[]; customers: number; arr: number };
 export const whatIf = (sandbox: string, service: string) => post("/api/whatif", { sandbox, service }).then(j<WhatIfData>);
-export type AskData = { answer: string; cites: string[]; rejected: number; calls: { tool: string; params: Record<string, unknown> }[]; services: string[] };
+export type AskData = { answer: string; cites: string[]; rejected: number; faithfulness?: { names: number; numbers: number; flagged: string[] }; calls: { tool: string; params: Record<string, unknown> }[]; services: string[] };
 export const askGraph = (sandbox: string, question: string) => post("/api/ask", { sandbox, question }).then(j<AskData>);
 export type ImportData = { sandbox: string; world: string; services: number; edges: number; notes: string[] };
 export const importCompose = (compose: string) => post("/api/import", { compose }).then(j<ImportData>);

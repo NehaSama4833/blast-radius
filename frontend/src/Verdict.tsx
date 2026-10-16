@@ -30,6 +30,12 @@ export default function Verdict({ r, sandbox, onFocus, onResolved, learned }: { 
       {r.verification && <p className="sim">Simulation: {r.verification.summary}</p>}
       {r.impact && (r.impact.arr > 0 || r.impact.features.length > 0) && <p className="impact">At stake: {r.impact.features.join(", ")} · {r.impact.customers} customers · ${r.impact.arr.toLocaleString()} ARR</p>}
       {r.people && <p className="impact">Page: {r.people.pick.map(p => `${p.name} (${p.awake ? "awake" : "asleep"}, ${p.local_time})`).join(", ")} in {r.people.channel}</p>}
+      {r.faithfulness && (() => {
+        const v = r.faithfulness.verdict, f = r.faithfulness.findings, flags = [...v.flagged, ...f.flagged];
+        return flags.length
+          ? <details className="faith bad"><summary>⚠ {flags.length} statement(s) mention a name or number no tool returned</summary><ul>{flags.map((x, i) => <li key={i}>{x}</li>)}</ul></details>
+          : <p className="faith ok">✓ Fact-checked: all {v.names + f.names} names and {v.numbers + f.numbers} numbers in this verdict and its findings appear in the tool results the agents read.</p>;
+      })()}
       <p className="meta">{r.claims.verified} claims checked against the graph, {r.claims.rejected} rejected · {r.duration_s}s</p>
       <div className="btns">
         <button disabled={busy || undetermined} onClick={() => act(() => postToDiscord(sandbox, r.investigation), "Posted the drafted message to the channel.")}>Approve &amp; post</button>

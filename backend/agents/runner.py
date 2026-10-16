@@ -208,7 +208,8 @@ def conclude(graph, s, d, hyps, board, ctx, alerting, push, t0):
     result = dict(investigation=s.inv_id, root_cause=rec["root_cause"], confidence=rec["confidence"], reasons=rec["reasons"],
                   claims=s.verification(), hypotheses=hyps, board=board, actions=actions, verification=verification,
                   impact=best.get("impact"), people=best.get("people"), precedent=best.get("precedent"), message=message,
-                  duration_s=round(time.time() - t0, 2), alerting=alerting, blames_deploy=d["blames_deploy"])
+                  duration_s=round(time.time() - t0, 2), alerting=alerting, blames_deploy=d["blames_deploy"],
+                  faithfulness=s.faithfulness(rec["reasons"], board))
     push("Lead", f"Done in {result['duration_s']} s. Claims verified: {result['claims']['verified']}/{result['claims']['verified'] + result['claims']['rejected']}", kind="done", result=result)
     return result
 

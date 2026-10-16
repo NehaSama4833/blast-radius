@@ -131,3 +131,24 @@ def test_dev_ambiguous_storm_offers_two_leads_and_single_cause_storms_do_not():
     assert len(d["cause_set"]) == 2 and "kafka" in [c["candidate"] for c in d["cause_set"]]
     g2, o2 = dev_graph("dev-hard-2")
     assert rank_root_causes(g2, o2.alerting).data["cause_set"] == []
+
+
+def test_branch_and_bound_matches_scoring_everyone():
+    """Pruning must not change the top-k: compare against top_k=1000 (nothing pruned) on many random storms."""
+    from backend.tools.ranking import rank_root_causes
+    rng = random.Random(5)
+    for wname in ("acme", "globex", "boutique"):
+        w = get_world(wname)
+        drop_graph("t_bb")
+        g = get_graph("t_bb")
+        load_world(g, w, now=NOW)
+        names = [s["name"] for s in w["services"]]
+        for _ in range(12):
+            roots = rng.sample(names, rng.choice([1, 1, 2]))
+            alerting = sorted(failure.alerting_for(w, roots)) or [roots[0]]
+            fast = rank_root_causes(g, alerting, top_k=5).data
+            full = rank_root_causes(g, alerting, top_k=1000).data
+            key = lambda r: (r["candidate"], r["score"], r["rank"])
+            assert [key(r) for r in fast["candidates"]] == [key(r) for r in full["candidates"][:5]]
+            assert fast["likely_multiple_causes"] == full["likely_multiple_causes"] and fast["cause_set"] == full["cause_set"]
+        drop_graph("t_bb")

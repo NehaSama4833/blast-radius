@@ -99,26 +99,55 @@ def rank_root_causes(graph, alerting, top_k=5, mode="f1") -> ToolResult:
     cands = sorted(explains)
     meta = {n: dict(monitored=m, layer=l) for n, m, l in rows(
         graph, "UNWIND $c AS x MATCH (s:Service {name:x}) RETURN s.name, s.monitored, s.layer", {"c": cands})}
-    predicts = {c: ({c} if meta[c]["monitored"] else set()) for c in cands}
-    for c, us in rows(graph, """
-        UNWIND $c AS cname
-        MATCH (u:Service {monitored: true})-[:DEPENDS_ON*1..6 {kind: 'sync'}]->(c:Service {name: cname})
-        RETURN cname, collect(DISTINCT u.name)""", {"c": cands}):
-        predicts[c] |= set(us)
-    for c, us in rows(graph, """
-        UNWIND $c AS cname
-        MATCH (u:Service {monitored: true})-[:DEPENDS_ON {kind: 'async'}]->(c:Service {name: cname})
-        RETURN cname, collect(DISTINCT u.name)""", {"c": cands}):
-        predicts[c] |= set(us)
+
+    def fetch_predicts(batch):
+        out = {c: ({c} if meta[c]["monitored"] else set()) for c in batch}
+        for c, us in rows(graph, """
+            UNWIND $c AS cname
+            MATCH (u:Service {monitored: true})-[:DEPENDS_ON*1..6 {kind: 'sync'}]->(c:Service {name: cname})
+            RETURN cname, collect(DISTINCT u.name)""", {"c": batch}):
+            out[c] |= set(us)
+        for c, us in rows(graph, """
+            UNWIND $c AS cname
+            MATCH (u:Service {monitored: true})-[:DEPENDS_ON {kind: 'async'}]->(c:Service {name: cname})
+            RETURN cname, collect(DISTINCT u.name)""", {"c": batch}):
+            out[c] |= set(us)
+        return out
+
+    # Exact branch-and-bound: precision <= 1, so a candidate's score can never beat F1(coverage, 1) = 2c/(1+c)
+    # (or c itself in coverage mode). Visit candidates by coverage, stop once that bound falls strictly below the
+    # k-th best score found so far. Same top-k as scoring everyone, far fewer expensive blast-radius walks on big graphs.
+    n_alert = len(alerting)
+    cov = {c: len(explains[c] & set(alerting)) / n_alert for c in cands}
+    bound = (lambda c: cov[c]) if mode == "coverage" else (lambda c: 2 * cov[c] / (1 + cov[c]) if cov[c] else 0.0)
+    order = sorted(cands, key=lambda c: -cov[c])
+    k = max(top_k, 5)
+    predicts, scored = {}, []
+    for i in range(0, len(order), 25):
+        batch = order[i:i + 25]
+        if len(scored) >= k and bound(batch[0]) < sorted(scored, reverse=True)[k - 1]:
+            break
+        predicts.update(fetch_predicts(batch))
+        scored = [r["score"] for r in score_candidates(alerting, {c: explains[c] for c in predicts}, predicts, meta, mode)]
+    pruned = len(cands) - len(predicts)
+    explains_all = explains
+    explains = {c: explains_all[c] for c in predicts}
 
     ranked = score_candidates(alerting, explains, predicts, meta, mode)
     for r in ranked:
         r["summary"] = describe(r, len(alerting))
     best_cov = max(r["coverage"] for r in ranked)
-    cause_set = split_causes(alerting, explains, predicts, meta) if best_cov < MULTI_CAUSE_THRESHOLD or ranked[0]["score"] < WEAK_FIT_THRESHOLD else []
+    best_cov = max(cov.values())
+    if best_cov < MULTI_CAUSE_THRESHOLD or ranked[0]["score"] < WEAK_FIT_THRESHOLD:
+        rest = [c for c in cands if c not in predicts]                  # the split needs everyone: fetch the rest
+        for i in range(0, len(rest), 50):
+            predicts.update(fetch_predicts(rest[i:i + 50]))
+        cause_set = split_causes(alerting, explains_all, predicts, meta)
+    else:
+        cause_set = []
     top = ranked[:top_k]
     data = dict(
-        alerting=alerting, n_alerting=len(alerting), n_candidates=len(ranked), candidates=top, cause_set=cause_set,
+        alerting=alerting, n_alerting=len(alerting), n_candidates=len(cands), n_scored=len(ranked), candidates=top, cause_set=cause_set,
         likely_multiple_causes=best_cov < MULTI_CAUSE_THRESHOLD,
         weak_fit=ranked[0]["score"] < WEAK_FIT_THRESHOLD,
         note=("No single service explains at least 70% of the alerts: likely more than one cause."
