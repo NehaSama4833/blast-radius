@@ -29,3 +29,7 @@ FROM NOW ON: no new features. Remaining = deploy (Sat, Neha's accounts), final b
 ## Oct 16: from the organizers
 Submissions close 11:59 PM IST Oct 18. Side prize: best blog post (write-up of what we built, how it works, what we learned), submitted with the project; top 50 teams get t-shirts.
 Blog plan: Sunday morning I write a strong full draft from docs/BLOG_DRAFT.md with the real benchmark numbers and a "what we learned" section; Neha adds her own voice/stories and publishes. Live-site budget: DAILY_INVESTIGATION_CAP=30, then replay.
+
+## Oct 16 afternoon (after competitor review)
+Added: extended held-out split (60, frozen, 3 worlds incl. boutique = real Online Boutique topology), fact-check (faithful.py), postmortem from graph, branch-and-bound ranking + docs/SCALE.md, LICENSE, AI disclosure, reproduce table. 126 tests.
+FINAL BENCHMARK (Sat night) must run: test split -> graph-llm, docs-llm, graph-rules, graph-coverage-only; extended split -> graph-llm, graph-rules, graph-coverage-only (docs-llm skipped for budget, ~$0.07/inv). Budget left ~$3.5.

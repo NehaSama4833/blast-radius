@@ -170,6 +170,16 @@ Everything here is tested with a scripted fake model. It has NOT been run agains
 
 **Demo moments.** `/api/whatif` (click a node: what breaks if it fails), `/api/late` (fire the alerts that the failure should have raised but were missing, then Ripple), `again` on `/api/chaos` (repeat the last break after resolving: the History agent cites the lesson just written). A new break or a resolve marks earlier alerts resolved, so storms never pile up.
 
+## 20. Fact-checking, postmortems, a real topology and scale (Oct 16)
+
+**Fact-checking (`backend/agents/faithful.py`).** Free text is the one place a model could slip something in. After every investigation we scan the verdict's reasons and every finding: each service name, deploy id (d-N) and incident id (INC-N) must be a node that the writer saw (in a tool result, or in the alert list every agent is given), and each number above 10 must appear in some tool result (as a value, a list length, a percentage of a 0-1 score, or inside a returned string). Small numbers are skipped because "3 findings" would cause false alarms. The UI shows "Fact-checked" or lists what was not found; the benchmark counts flags. The rule policy's template text passes with zero flags on all dev scenarios (a sanity check of the checker). The same check runs on Ask the graph answers.
+
+**Postmortem (`backend/agents/postmortem.py`, `/api/postmortem/...`).** A traversal of the investigation's nodes rendered as Markdown: summary, timeline, reasons, hypotheses with each agent's findings, alerting services, the lesson saved, suggested follow-ups. No model is involved.
+
+**Boutique world.** The call graph of Google's Online Boutique demo (frontend, checkout, cart, product catalog, currency, payment, shipping, email, recommendation, ad, redis-cart). We chose which services lack alerting (redis-cart, currencyservice) and invented teams, people and history; the edges are the project's.
+
+**Scale.** `rank_root_causes` now visits candidates by coverage and stops once a candidate's best possible score (coverage with perfect precision) is below the current top-k, which gives exactly the same top-k (tested on 36 random storms over three worlds) with far fewer expensive blast-radius walks. Results in docs/SCALE.md.
+
 ## Not built yet
 
 Ripple in the web screen, real-model tuning on dev scenarios, re-recording the replay from a real run, the final benchmark on the held-out test split, BENCHMARK.md, the blog and demo script.
