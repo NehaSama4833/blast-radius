@@ -5,10 +5,13 @@ async function j<T>(r: Response): Promise<T> {
   return r.json();
 }
 const post = (u: string, b: unknown) => fetch(u, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) });
+// setup calls get a deadline so a sleeping server shows a message instead of "loading…" forever
+const slow = (u: string, init?: RequestInit) => fetch(u, { ...init, signal: AbortSignal.timeout(75000) })
+  .catch(e => { throw new Error(e?.name === "TimeoutError" ? "The server is waking up or busy. Please reload in a minute." : "Can't reach the server. Please reload in a minute."); });
 
-export const getWorlds = () => fetch("/api/worlds").then(j<{ worlds: { name: string; services: number }[]; actions: string[]; change_kinds: string[] }>);
-export const newSandbox = (world: string) => post("/api/sandbox", { world }).then(j<{ sandbox: string; world: string }>);
-export const getGraph = (s: string) => fetch(`/api/graph/${s}`).then(j<GraphData>);
+export const getWorlds = () => slow("/api/worlds").then(j<{ worlds: { name: string; services: number }[]; actions: string[]; change_kinds: string[] }>);
+export const newSandbox = (world: string) => slow("/api/sandbox", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ world }) }).then(j<{ sandbox: string; world: string }>);
+export const getGraph = (s: string) => slow(`/api/graph/${s}`).then(j<GraphData>);
 export const chaos = (sandbox: string, o: { service?: string; change_kind?: string; surprise?: boolean; again?: boolean }) =>
   post("/api/chaos", { sandbox, ...o }).then(j<{ alerting: string[]; n_alerts: number }>);
 export const resolve = (sandbox: string, investigation: string, action: string, ttr_min: number) =>

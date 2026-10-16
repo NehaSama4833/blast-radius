@@ -148,8 +148,16 @@ class Post(BaseModel):
 
 
 @app.get("/api/health")
-def health():
-    return dict(ok=True, worlds=WORLDS)
+def health(db: int = 0):
+    """`/api/health?db=1` also round-trips to FalkorDB, so a dead database connection shows up here."""
+    if not db:
+        return dict(ok=True, worlds=WORLDS)
+    t = time.time()
+    try:
+        n = len(sandbox.list_sandboxes())
+    except Exception as e:
+        return dict(ok=False, db="unreachable", error=type(e).__name__ + ": " + str(e)[:200])
+    return dict(ok=True, worlds=WORLDS, db="ok", db_ms=round((time.time() - t) * 1000), sandboxes=n)
 
 
 @app.get("/api/worlds")

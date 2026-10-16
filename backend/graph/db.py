@@ -13,7 +13,9 @@ def get_db():
     if url:
         from falkordb import FalkorDB
 
-        return FalkorDB.from_url(url)
+        # timeouts so a sleeping or unreachable cloud database fails fast with a clear error instead of hanging forever
+        return FalkorDB.from_url(url, socket_timeout=30, socket_connect_timeout=10,
+                                 socket_keepalive=True, health_check_interval=30, retry_on_timeout=True)
     from redislite.falkordb_client import FalkorDB
 
     return FalkorDB()
