@@ -9,6 +9,7 @@ import Intro from "./Intro";
 import Hero from "./Hero";
 import Ask from "./Ask";
 import Import from "./Import";
+import Postmortem from "./Postmortem";
 import { COLOR } from "./agents";
 import type { Ev, GraphData, Hyp, Result } from "./types";
 
@@ -36,6 +37,7 @@ export default function App() {
   const [resolved, setResolved] = useState(false);
   const [wi, setWi] = useState<WhatIfData | null>(null);
   const [showImport, setShowImport] = useState(false);
+  const [pm, setPm] = useState<string | null>(null);
   const [importNotes, setImportNotes] = useState<string[]>([]);
 
   const reset = () => { queue.current = []; setEvents([]); setResult(null); setFocus(null); setProof([]); setWi(null); };
@@ -101,6 +103,7 @@ export default function App() {
   const idle = !alerting.length && !events.length;
   return (
     <div className="app">
+      {pm && <Postmortem sandbox={sbx} inv={pm} onClose={() => setPm(null)} />}
       {showImport && <Import onClose={() => setShowImport(false)} onDone={async d => {
         setShowImport(false); reset(); setAlerting([]); setSbx(d.sandbox); setWorld("imported"); setImportNotes(d.notes);
         setGraph(await getGraph(d.sandbox));
@@ -156,6 +159,7 @@ export default function App() {
           {result && !running && (
             <div className="next">
               {result.root_cause && result.root_cause !== "undetermined" && !resolved && <button onClick={doLate} disabled={busy}>⚡ A late alert arrives</button>}
+              {resolved && <button onClick={() => setPm(result.investigation)}>📄 Postmortem (written from the graph)</button>}
               {resolved && <button className="again" onClick={() => doChaos({ again: true })} disabled={busy}>↻ Same failure again: does it remember?</button>}
               <span className="hint">Tip: click any service on the map to see what would break if it failed.</span>
             </div>

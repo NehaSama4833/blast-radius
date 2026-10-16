@@ -26,6 +26,7 @@ from backend.world.loader import load_alerts, load_world
 from backend.agents.ripple import ripple
 from backend.tools.registry import call_tool
 from backend.agents.ask import ask
+from backend.agents.postmortem import postmortem
 from backend.agents.llm import client_from_env
 from backend.world.compose_import import compose_to_world
 
@@ -194,11 +195,12 @@ def chaos(body: Chaos, req: Request):
     elif body.surprise:
         svcs = topo.svc_map(world)
         cands = [n for n, s in svcs.items() if not s["monitored"] and sum(1 for d in topo.sync_dependents(world, n) if svcs[d]["monitored"]) >= 4]
-        if not cands:                               # small imported systems: anything that takes at least one monitored service down
-            cands = [n for n in svcs if any(svcs[d]["monitored"] for d in topo.sync_dependents(world, n))] or list(svcs)
-        small = _world_of(g) not in CONFIGS               # imported systems are small: noise would drown the signal
+        if not cands:                               # small systems: a silent service that takes 2+ monitored services down, else anything
+            cands = [n for n, s in svcs.items() if not s["monitored"] and sum(1 for d in topo.sync_dependents(world, n) if svcs[d]["monitored"]) >= 2] \
+                or [n for n in svcs if any(svcs[d]["monitored"] for d in topo.sync_dependents(world, n))] or list(svcs)
+        small = _world_of(g) not in CONFIGS or len(svcs) < 20     # small systems: full noise would drown the signal
         service, kind = rng.choice(sorted(cands)), rng.choice(CHANGE_KINDS)
-        noise = {} if small else dict(flaky=True, missing=True, distractors=2)
+        noise = dict(distractors=1) if small else dict(flaky=True, missing=True, distractors=2)
     else:
         if body.service not in topo.svc_map(world):
             raise HTTPException(400, "unknown service")
@@ -315,6 +317,18 @@ def late_alert(body: Late, req: Request):
             yield f"data: {json.dumps(e, default=str)}\n\n"
 
     return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.get("/api/postmortem/{name}/{inv}")
+def get_postmortem(name: str, inv: str, req: Request):
+    _guard(req)
+    g = _sandbox_graph(name)
+    if not inv.startswith("inv-") or not inv[4:].isdigit():
+        raise HTTPException(400, "bad investigation id")
+    try:
+        return dict(markdown=postmortem(g, inv))
+    except ValueError as e:
+        raise HTTPException(404, str(e))
 
 
 @app.post("/api/ask")

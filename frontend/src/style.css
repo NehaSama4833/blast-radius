@@ -81,3 +81,5 @@ main>section{min-width:0}.right{overflow-x:hidden}
 @media(max-width:900px){main{display:flex;flex-direction:column;overflow:auto}.left{min-height:380px;border-right:none;border-bottom:1px solid var(--line)}
   .right{overflow:visible}.app{height:auto;min-height:100vh}}
 .faith{font-size:12px;margin:6px 0}.faith.ok{color:var(--green)}.faith.bad{color:var(--amber)}.faith ul{margin:4px 0 0 16px;padding:0}
+.pm h2{font-size:20px;margin:0 0 6px}.pm h4{margin:14px 0 4px;color:var(--blue)}.pm p,.pm li{font-size:13px}.pm ul{margin:4px 0 4px 18px;padding:0}
+.pm code{background:rgba(110,118,129,.2);padding:1px 4px;border-radius:4px}

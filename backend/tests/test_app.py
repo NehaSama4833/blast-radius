@@ -166,3 +166,15 @@ def test_ask_the_graph_checks_citations(client, monkeypatch):
     assert r["answer"].startswith("Platform") and r["cites"] == ["Service:redis-cache"] and r["rejected"] == 1
     assert r["calls"][0]["tool"] == "find_experts" and r["services"] == ["redis-cache"]
     assert client.post("/api/ask", json={"sandbox": sb, "question": "x" * 400}).status_code == 422
+
+
+def test_postmortem_from_graph(client):
+    sb = client.post("/api/sandbox", json={"world": "acme"}).json()["sandbox"]
+    client.post("/api/chaos", json={"sandbox": sb, "service": "ledger-db", "change_kind": "config"})
+    res = events(client.post("/api/investigate", json={"sandbox": sb}))[-1]["result"]
+    client.post("/api/resolve", json={"sandbox": sb, "investigation": res["investigation"], "action": "rollback", "ttr_min": 7})
+    md = client.get(f"/api/postmortem/{sb}/{res['investigation']}").json()["markdown"]
+    assert md.startswith("# Postmortem: ledger-db") and "## Timeline" in md and "resolved by rollback" in md
+    assert "Lesson saved to memory" in md and "Add monitoring to ledger-db" in md
+    assert client.get(f"/api/postmortem/{sb}/inv-999").status_code == 404
+    assert client.get(f"/api/postmortem/{sb}/../x").status_code in (400, 404)
