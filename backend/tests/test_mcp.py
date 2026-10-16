@@ -18,7 +18,7 @@ def server(acme_graph, monkeypatch):
 def test_mcp_exposes_every_read_tool(server):
     listed = asyncio.run(server.mcp.list_tools())
     names = {t.name for t in (listed.tools if hasattr(listed, "tools") else listed)}
-    assert names == set(TOOLS)
+    assert names == set(TOOLS) | {"suspect_releases"}          # + the PyPI supply-chain tool (GRAPH_NAME=pypi)
 
 
 def _text(result):
