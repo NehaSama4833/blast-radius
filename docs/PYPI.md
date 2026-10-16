@@ -16,8 +16,8 @@ GRAPH_NAME=pypi python -m mcp_server.server       # the same graph and tools fro
 | | Count | Source |
 |---|---:|---|
 | `(:Service)` packages | 14,997 | the 15,000 most-downloaded PyPI projects ([hugovk/top-pypi-packages](https://github.com/hugovk/top-pypi-packages), list of 2026-10-01; 3 had no metadata) |
-| `[:DEPENDS_ON {kind:'sync'}]` required dependencies | 49,786 | each package's current `requires_dist`, both ends in the set |
-| `[:DEPENDS_ON {kind:'optional'}]` extras | 47,604 | `pkg[extra]` requirements; loaded but never walked |
+| `[:DEPENDS_ON {kind:'sync'}]` required dependencies | 48,766 | each package's current `requires_dist`, both ends in the set |
+| `[:DEPENDS_ON {kind:'optional'}]` extras | 48,624 | `pkg[extra]` requirements; loaded but never walked |
 | `(:Deploy {kind:'release'})-[:TO]->` releases | 1,193,520 | upload time of every non-yanked release |
 | Total | 1.21 M nodes, 1.29 M relationships | about 600 MB in FalkorDB, loads in about 30 s |
 
@@ -28,7 +28,7 @@ It uses the same schema as the company worlds, so the same Cypher, tools and MCP
 
 ## The question
 
-A dozen-plus packages' CI goes red within a few hours. Hundreds of other packages released something in the same
+Nine to fifty packages' CI goes red within a few hours. Hundreds of other packages released something in the same
 48 hours. **Which release did it?** The tool, `suspect_releases` (`backend/tools/supply_chain.py`), is one Cypher
 query:
 
@@ -43,8 +43,8 @@ RETURN c.name, collect(DISTINCT a.name), max(last), head(versions)
 
 It walks from each failing package down its required dependencies, keeps the packages that released something in
 the window, and counts how many failures each one can explain (coverage). Ranking: coverage, then F1 (coverage ×
-precision), then the newer release. The query shape (path variable, 0 or 1 to 2 hops, a property filter) is one the
-FalkorDB fuzzer found correct ([FALKORDB_FINDINGS.md](FALKORDB_FINDINGS.md)), and every run below is also checked
+precision), then the newer release. The query shape (path variable, 0 or 1 to 2 hops, a property filter) is one we check against a
+brute-force reference in `test_our_query_shapes_are_not_affected_by_f1` ([FALKORDB_FINDINGS.md](FALKORDB_FINDINGS.md)), and every run below is also checked
 against a plain Python BFS over the same snapshot.
 
 ## The incidents
@@ -61,7 +61,7 @@ with their real upload time.
 
 What is **simulated**: which packages fail. For each incident and seed (3 seeds), a random 15 to 50% of the
 culprit's direct dependents fail (3 to 40 of them), each failing package sometimes takes one of its own dependents
-down too, and up to 5 unrelated packages fail as noise. The first failure comes 1 to 6 hours after the upload.
+down too, and 2 to 5 unrelated packages fail as noise. The first failure comes 1 to 6 hours after the upload.
 Scenarios are frozen in `bench/scenarios/pypi_dev.json` and `pypi_test.json`.
 
 ## Results

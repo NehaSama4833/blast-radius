@@ -8,8 +8,9 @@ breaks only *some* of its dependents (many pin versions or avoid the changed API
 here: on the 14 dev incidents F1-first found 25/42 culprits and coverage-first 40/42 (docs/PYPI.md). That run chose
 this default; the 7 test incidents were run once afterwards.
 
-Query shape note: the walk uses a path variable and starts at 0 or 1 hop. Those are the shapes the FalkorDB fuzzer
-found correct (docs/FALKORDB_FINDINGS.md); bench/pypi_incidents.py also cross-checks every answer with a Python BFS.
+Query shape note: the walk has a path variable and a property filter and starts at 0 or 1 hop, a shape checked
+against brute force in test_our_query_shapes_are_not_affected_by_f1 (docs/FALKORDB_FINDINGS.md);
+bench/pypi_incidents.py also cross-checks every answer with a Python BFS.
 """
 from backend.tools.base import ToolResult, cite, rows
 

@@ -7,8 +7,8 @@ other built-in algorithms, on thousands of small random graphs, against NetworkX
     python -m bench.fuzz_falkordb --graphs 300 --seed 7 --out bench/results/fuzz_falkordb.json
 
 Every mismatch is saved with the exact graph (edge list), the query and both answers, so it can be replayed.
-A mismatch is a *difference*, not automatically a bug: some differences are documented semantics. docs/FALKORDB_FUZZ.md
-classifies each one after checking it by hand.
+A mismatch is a *difference*, not automatically a bug. docs/FALKORDB_FINDINGS.md classifies them after checking
+by hand. Checks that do not apply to a graph (e.g. PageRank with parallel edges) count as agreeing runs.
 """
 import argparse
 import json

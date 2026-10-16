@@ -24,14 +24,16 @@ Tested on FalkorDB **4.18.3** (embedded `falkordblite` 0.10.0). CI runs the repr
 | `shortestPath()` length | NetworkX BFS | 2000 | 0 |
 | `algo.BFS` | NetworkX BFS | 2000 | 0 |
 | `algo.WCC` | NetworkX | 2000 | 0 |
-| `algo.pageRank` (graphs without parallel edges or self loops) | NetworkX | 2000 | 0 |
-| `algo.betweenness` | NetworkX (exact) | 2000 | **1406** |
+| `algo.pageRank` (graphs without parallel edges or self loops) | NetworkX | 1579 | 0 |
+| `algo.betweenness` (graphs with at least one edge) | NetworkX (exact) | 1849 | **1406** |
 | `algo.SPpaths` weighted shortest path | NetworkX Dijkstra | 2000 | 0 |
-| `algo.MSF` total weight | NetworkX | 2000 | 0 |
+| `algo.MSF` total weight (graphs with at least one edge) | NetworkX | 1849 | 0 |
 | our own exact betweenness (`backend/tools/centrality.py`) | NetworkX | 2000 | 0 |
 
-Every difference is stored with its graph and query in `bench/results/fuzz_falkordb.json`. We then shrank them by
-hand (and with a delta-debugging loop) to the three cases below. Each is 3 or 4 nodes.
+Up to 8 examples of each kind of difference are stored, with graph and query, in `bench/results/fuzz_falkordb.json`
+(rerun the fuzzer to get all of them). We shrank them by hand and with a delta-debugging loop to the three cases
+below. Each is 3 or 4 nodes. `algo.betweenness` is sampled, so its count changes a little from run to run (1,413 on
+a rerun with the same seed); the other counts are deterministic.
 
 ## F1. A bounded variable-length pattern without a path variable misses reachable nodes
 
@@ -65,10 +67,9 @@ MATCH p=(:N {name:'a'})-[:E*4]->(t:N) RETURN [x IN nodes(p) | x.name]
 - With `*3` FalkorDB returns `[a, b, c, b]`, so a repeated node is allowed as the *last* hop, but the path is never
   extended after it. A self loop behaves the same: with `a->b, b->b, b->c`, `a-[*1..3]->` misses `a->b->b->c`.
 - openCypher only forbids using the same relationship twice in one path; nodes may repeat. This affects both named
-  and unnamed patterns. In a separate run (1,500 graphs, seed 99), a brute-force reference with this rule added
-  reproduced FalkorDB exactly in 208 of the 337 named-pattern differences. The smallest remaining case we shrank is a
-  self loop (`3->1, 1->1, 1->5`: `3->1->1->5` is missing), the same "no extension after a repeat" pattern; we have not
-  classified every remaining case.
+  and unnamed patterns. In a separate run (`--graphs 1500 --seed 99`), a brute-force reference that adds this rule ("a path is
+  never extended from a node it has already visited") reproduced FalkorDB exactly in all 259 named-pattern
+  differences.
 
 ## F3. `algo.betweenness` is a sampled estimate even when the exact answer is cheap
 
@@ -81,7 +82,7 @@ YIELD node, score WHERE node.name = 'b' RETURN score
 -- got:      0.0, 1.0 or 2.0 depending on samplingSeed
 ```
 
-- With the default settings the score is 0 or 2 depending on the order the three nodes were created in. It is never 1.
+- On random graphs the default call (no sampling parameters) differs from the exact answer in 1,406 of the 1,849 graphs that have edges.
 - This looks like source nodes being drawn with replacement, even when `samplingSize` is larger than the graph.
   If sampling is intended, we suggest computing exactly when `samplingSize >= node count`, and documenting that the
   score is an unscaled estimate.
@@ -114,7 +115,7 @@ fixes one, CI fails and tells us to update this page.
 > openCypher relationship-uniqueness semantics. F1 is the more serious: on an acyclic graph,
 > `MATCH (:N {name:'a'})-[:E*1..2]->(t) RETURN t` misses a node at distance 2 unless the pattern is bound to a path
 > variable or has no type. Found with a differential fuzzer against a brute-force reference (2,000 random graphs:
-> 226 wrong node sets for the unbound pattern). Script: `bench/falkordb_repros.py`.
+> 549 differences for the unbound pattern vs 366 with a path variable). Script: `bench/falkordb_repros.py`.
 >
 > A separate issue for `algo.betweenness` (F3): on a 3-node chain the middle node scores 0, 1 or 2 depending on
 > `samplingSeed`, even with `samplingSize: 300`.

@@ -61,7 +61,7 @@ def _reach(edges, s, lo, hi, reverse=False):
 
 def test_our_query_shapes_are_not_affected_by_f1():
     """The ranking and impact queries use bounded variable-length patterns. They carry a property filter
-    ({kind:'sync'}) or a path variable, which the fuzzer found are not affected. Check the exact shapes on random
+    ({kind:'sync'}) or a path variable; on F1's graph both give the right answer. Check the exact shapes on random
     DAGs whose depth limit binds, which is where F1 shows up."""
     g = get_graph("shape_guard")
     rng = random.Random(4)

@@ -53,8 +53,7 @@ def f2_expansion_stops_at_repeated_node():
 def f3_betweenness_sampled_even_when_exact_is_cheap():
     """algo.betweenness on the chain a->b->c: exactly one shortest path (a to c) passes through b, so b scores 1.
 
-    FalkorDB samples source nodes even when samplingSize >= node count, so b scores 0, 1 or 2 depending on the seed,
-    and with the default settings 0 or 2 depending on the order the nodes were created in."""
+    FalkorDB samples source nodes even when samplingSize >= node count, so b scores 0, 1 or 2 depending on the seed."""
     g = fresh("repro_f3")
     g.query("CREATE (:N {name:'a'})-[:E]->(:N {name:'b'})-[:E]->(:N {name:'c'})")
     q = ("CALL algo.betweenness({nodeLabels:['N'], relationshipTypes:['E'], samplingSize: 300, samplingSeed: $s}) "
