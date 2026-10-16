@@ -20,3 +20,4 @@ bench/results/
 *.key
 secrets.json
 credentials.json
+bench/data/npm_snapshot.json.gz

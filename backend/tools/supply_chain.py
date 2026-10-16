@@ -5,7 +5,7 @@ packages that had a release in the time window, and collect which failing packag
 Each release gets coverage (share of failures it can explain) and precision (share of the package's dependents that
 are failing). Ranking: coverage first, then F1, then the newer release. Unlike the company worlds, a broken library
 breaks only *some* of its dependents (many pin versions or avoid the changed API), so precision is a weak signal
-here: on the 14 dev incidents F1-first found 25/42 culprits and coverage-first 40/42 (docs/PYPI.md). That run chose
+here: on the 14 dev incidents F1-first found 25/42 culprits and coverage-first 40/42 (docs/ECOSYSTEMS.md). That run chose
 this default; the 7 test incidents were run once afterwards.
 
 Query shape note: the walk has a path variable and a property filter and starts at 0 or 1 hop, a shape checked

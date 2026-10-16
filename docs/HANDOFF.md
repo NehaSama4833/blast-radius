@@ -4,7 +4,8 @@ Project: Blast Radius for Graph Hacks (Oct 15 00:01 - Oct 18 23:59 IST; submissi
 
 ## Oct 17 early (IST 04:00-06:00)
 - FalkorDB Cloud instance was gone; Neha is creating a new one (Singapore or Mumbai) and updating FALKORDB_URL on Render.
-- Added: /api/ready + wake-up screen + DB socket timeouts; CI frontend job + badge; FalkorDB differential fuzzer with 3 findings (docs/FALKORDB_FINDINGS.md), exact betweenness; PyPI world + 21 real incidents (docs/PYPI.md: 40/42 dev, 21/21 test); Beat-the-agents game. 136 tests + 3 strict xfails.
+- Added: /api/ready + wake-up screen + DB socket timeouts; CI frontend job + badge; FalkorDB differential fuzzer with 3 findings (docs/FALKORDB_FINDINGS.md), exact betweenness; PyPI world + 21 real incidents (docs/ECOSYSTEMS.md: 40/42 dev, 21/21 test); Beat-the-agents game. 136 tests + 3 strict xfails.
+- Later: npm world (50k packages, 5.5 M releases; full snapshot gitignored, 2.4 MB slice committed; 30/30 held-out). The final-benchmark scheduled task text omits the extended split; follow the plan here: test split 4 conditions + extended split graph-llm/graph-rules/graph-coverage-only.
 - The agents' tool registry is unchanged (suspect_releases is MCP-only), so tonight's final benchmark conditions are as planned. critical_services now uses exact betweenness.
 
 ## State (update at the end of every run)

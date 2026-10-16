@@ -9,7 +9,7 @@ Mapped onto the same schema as the company worlds, so the same Cypher, tools and
     (:Service)-[:DEPENDS_ON {kind:'optional'}]->(:Service)      an extra (pip install pkg[extra]); never walked
     (:Deploy {id, ts, kind:'release', version, summary})-[:TO]->(:Service)   one per release, real upload time
 Dependency edges are as of the snapshot date (packages change their requirements over time); release times are
-historical. The README and docs/PYPI.md say so wherever results are reported.
+historical. The README and docs/ECOSYSTEMS.md say so wherever results are reported.
 """
 import gzip
 import json

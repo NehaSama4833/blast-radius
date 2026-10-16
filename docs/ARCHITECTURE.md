@@ -195,14 +195,16 @@ turned out to be a sampled estimate, so `critical_services` now computes exact b
 `backend/tools/centrality.py`) over the edges it reads from FalkorDB. Our variable-length query shapes were checked
 to be on the safe side of the other two findings (`test_our_query_shapes_are_not_affected_by_f1`).
 
-## 23. The PyPI world (Oct 17)
+## 23. The PyPI and npm worlds (Oct 17)
 
 `scripts/fetch_pypi.py` snapshots public PyPI metadata for the 15,000 most-downloaded packages (requirements and
 the upload time of every release). `backend/world/pypi.py` loads it with the same labels as the company worlds:
 packages are `Service`, required dependencies are `DEPENDS_ON {kind:'sync'}`, releases are `Deploy`. That is
 1.2 M nodes and 1.29 M relationships, loaded in about 30 s. `backend/tools/supply_chain.py` (`suspect_releases`)
 answers "which release in the last 48 hours explains these failing packages?" with one Cypher query, and
-`bench/pypi_incidents.py` replays 21 real incidents on it (PYPI.md). It is a benchmark and MCP world, not a web
+`bench/pypi_incidents.py` replays 21 real incidents on it (ECOSYSTEMS.md). `scripts/fetch_npm.py` and
+`backend/world/npm.py` do the same for npm: 50,000 packages and 5.5 M releases, with 10 real incidents in
+`bench/npm_incidents.py` (colors.js, ua-parser-js, node-ipc, event-stream, …). It is a benchmark and MCP world, not a web
 world: 15,000 nodes do not fit on one screen, and per-visitor copies of a 600 MB graph would not fit the free tier.
 
 ## 24. Beat the agents (Oct 17)

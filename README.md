@@ -15,7 +15,7 @@ Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Con
 | | |
 |---|---|
 | **We tested FalkorDB itself** | A differential fuzzer ran FalkorDB's path queries and algorithms on 2,000 random graphs against NetworkX and brute force. It found **3 reproducible issues** in FalkorDB 4.18.3, each shrunk to a 3- or 4-node graph: a bounded variable-length pattern that misses reachable nodes on a DAG, paths that are never extended past a repeated node, and `algo.betweenness` returning 0, 1 or 2 where the exact answer is 1. One affected us, and we fixed it. [docs/FALKORDB_FINDINGS.md](docs/FALKORDB_FINDINGS.md) |
-| **A real, huge graph** | The Python ecosystem in FalkorDB: **14,997 PyPI packages, 48,766 required dependencies and 1,193,520 real releases** (1.2 M nodes). We replayed **21 real supply-chain incidents** (numpy 2.0, setuptools 72, urllib3 2.0, pydantic 2, requests 2.32, …): the culprit release was ranked first in **61 of 63** runs (21/21 on the held-out split) among ~685 releases in the same 48 hours, in 0.06 s per query. Packages, edges, release times and culprits are real; which dependents fail is simulated. [docs/PYPI.md](docs/PYPI.md) |
+| **A real, huge graph** | Two real package ecosystems in FalkorDB: **64,997 PyPI and npm packages, 208,433 dependencies and 6,682,104 real releases**. We replayed **31 real supply-chain incidents**: numpy 2.0, setuptools 72, urllib3 2.0, requests 2.32, the **colors.js sabotage**, the **ua-parser-js hijack**, **node-ipc protestware**, event-stream, is-promise, eslint 9 and more. The culprit release was ranked first in **91 of 93** runs, and in **51 of 51** runs that were never used to tune anything, among ~685 (PyPI) and ~2,600 (npm) releases in the same 48 hours, in about 0.1 s per query. Packages, edges, release times and culprits are real; which dependents fail is simulated. [docs/ECOSYSTEMS.md](docs/ECOSYSTEMS.md) |
 | **Beat the agents** | Break something, click the service you think did it and lock in your guess, then let the agents race you. Every round is stored in a shared FalkorDB graph, so the page shows humans vs. agents across all visitors. |
 
 ## What makes it different
@@ -46,7 +46,7 @@ Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Con
 |---|---|
 | Dependency reasoning | Variable-length sync paths `-[:DEPENDS_ON*0..6 {kind:'sync'}]->` for coverage and blast radius; async edges for lag |
 | Graph algorithms | `algo.pageRank` for the most depended-on services. Betweenness is computed exactly in Python over edges read from FalkorDB, because `algo.betweenness` samples ([findings](docs/FALKORDB_FINDINGS.md)) |
-| Real data at scale | The PyPI world: 1.2 M nodes and 1.29 M relationships, one Cypher query per triage (0.06 s median) |
+| Real data at scale | The PyPI and npm worlds: 6.7 M nodes in all (5.5 M releases in the npm graph alone), one Cypher query per triage (0.06 to 0.11 s median) |
 | Shared state | The Beat-the-agents scoreboard is one graph every visitor writes `Round` nodes into |
 | Simulation | `GRAPH.COPY` to a scratch graph, apply the fix, re-run the failure model, drop the copy |
 | Isolation | One `GRAPH.COPY` sandbox per visitor (2 h TTL, capped), so anyone can break the company safely |
@@ -57,7 +57,7 @@ Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Con
 
 Remove FalkorDB and there is no ranking, no board, no memory, no sandbox and no simulation.
 
-**Also an MCP server:** the same 11 graph tools (plus `suspect_releases` for the PyPI world) work from Claude Desktop or any MCP client: `python -m mcp_server.server`, or `GRAPH_NAME=pypi python -m mcp_server.server` for the real ecosystem (see [mcp_server/server.py](mcp_server/server.py)).
+**Also an MCP server:** the same 11 graph tools (plus `suspect_releases` for the PyPI and npm worlds) work from Claude Desktop or any MCP client: `python -m mcp_server.server`, or `GRAPH_NAME=pypi` / `GRAPH_NAME=npm` for the real ecosystems (see [mcp_server/server.py](mcp_server/server.py)).
 
 ## How it works (one paragraph)
 
@@ -98,7 +98,7 @@ graph LR
 **The company** (loaded from a world generator, one graph per world): `Service {name, layer, tier, language, monitored}`, `Team {name, channel}`, `Person {name, handle, timezone, on_call}`, `Feature {name}`, `Customer {name, plan, arr}`, `Runbook {title, steps}-[:FOR]->Service`, `Deploy {id, ts, kind, summary, diff}`, `Commit {sha, message}` (`Person-[:AUTHORED]->Commit-[:TOUCHES]->Service`), `Alert {id, ts, signal, severity, resolved?}`.
 **Memory**: `Incident {id, title, summary, severity, started_at, resolved_at}` (full-text index on `summary`), `Resolution {summary, action, ttr_min}`, `Lesson {pattern, fix, times_seen, last_seen, avg_ttr_min}`, `Person-[:RESPONDED_TO]->Incident`, `Incident-[:AFFECTED]->Service`.
 **Coordination** (written by the agents during an investigation): `Investigation {id, ts, status, model}`, `Agent {name}`, `Hypothesis {id, rank, structural_score, status}`, `Finding {id, kind, text, weight, receipt}` (receipt = JSON: tool calls, parameters, graph version, nodes read), `Decision {root_cause, confidence, reasons, actions, receipt, message, verification, faith}`, `Audit {verdict, checks}`. Ripple keeps history with `Finding-[:SUPERSEDED_FOR]->Hypothesis` and `Investigation-[:PREVIOUSLY_CONCLUDED]->Decision`.
-**The PyPI world** (same labels, real data): `Service` = a package (`downloads_30d`), `DEPENDS_ON {kind:'sync'|'optional'}` = required dependency or extra, `Deploy {kind:'release', version, ts}` = a real release. Details in [docs/PYPI.md](docs/PYPI.md).
+**The PyPI and npm worlds** (same labels, real data): `Service` = a package (`downloads_30d`), `DEPENDS_ON {kind:'sync'|'optional'}` = required dependency or extra, `Deploy {kind:'release', version, ts}` = a real release. npm releases also carry `removed` (versions npm took down). Details in [docs/ECOSYSTEMS.md](docs/ECOSYSTEMS.md).
 **Game**: the `scoreboard` graph holds one `Round {world, truth, human, agent, human_ok, agent_ok, ts}` per guessed round.
 **Sandboxes**: every visitor gets `sbx_<id>`, a `GRAPH.COPY` of the world with a `Meta {world, loaded_at, created_at}` node; simulations use throwaway `sim_<id>` copies.
 
@@ -145,7 +145,7 @@ MATCH (s:Service {name:$s})-[:OWNED_BY]->(t:Team)<-[:MEMBER_OF]-(p:Person) RETUR
 MATCH (p:Person)-[:RESPONDED_TO]->(i:Incident)-[:CAUSED_BY]->(:Deploy)-[:TO]->(:Service {name:$s}) RETURN p.handle, count(DISTINCT i)
 ```
 **Critical services**: `CALL algo.pageRank('Service','DEPENDS_ON')`, plus exact betweenness (Brandes) over `MATCH (a:Service)-[:DEPENDS_ON]->(b:Service) RETURN a.name, b.name` (`centrality.py`).
-**Supply-chain triage** (`supply_chain.py`, PyPI world): which recent release explains the failing packages?
+**Supply-chain triage** (`supply_chain.py`, PyPI and npm worlds): which recent release explains the failing packages?
 ```cypher
 UNWIND $failing AS name
 MATCH p=(a:Service {name: name})-[:DEPENDS_ON*0..2 {kind: 'sync'}]->(c:Service)
@@ -176,7 +176,8 @@ RETURN h.id, h.rank, h.structural_score, h.status, s.name, f.id, f.kind, f.text,
 | scenario files are frozen | `pytest backend/tests/test_failure_model.py -k frozen` | |
 | FalkorDB differential fuzz (2,000 graphs) | `python -m bench.fuzz_falkordb --graphs 2000 --seed 20261017` | [docs/FALKORDB_FINDINGS.md](docs/FALKORDB_FINDINGS.md) |
 | the 3 FalkorDB reproductions | `python -m bench.falkordb_repros` (or `FALKORDB_URL=... ` for a server) | [docs/FALKORDB_FINDINGS.md](docs/FALKORDB_FINDINGS.md) |
-| 21 real PyPI incidents | `python -m bench.pypi_incidents --split dev` and `--split test` | [docs/PYPI.md](docs/PYPI.md) |
+| 21 real PyPI incidents | `python -m bench.pypi_incidents --split dev` and `--split test` | [docs/ECOSYSTEMS.md](docs/ECOSYSTEMS.md) |
+| 10 real npm incidents (5.5 M releases) | `python scripts/fetch_npm.py --max 50000` then `python -m bench.npm_incidents` (or the committed slice, same results) | [docs/ECOSYSTEMS.md](docs/ECOSYSTEMS.md) |
 
 The held-out runner refuses to run without `--final`, and the scenario files are checked against their generator by a test, so nobody can tune on them by accident.
 
