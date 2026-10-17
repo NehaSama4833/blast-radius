@@ -30,7 +30,7 @@ Press **Investigate**. Five agents start reading the graph, each in its own colo
 
 If two things broke at once and the evidence cannot separate them, the Lead says **"undetermined"**. I care about that more than any other feature. A tool that can say "I don't know" is one you can trust when it says "I do."
 
-[NEHA: one sentence on what surprised you while building this.]
+The biggest surprise was that my own safety check was wrong. When I planted a fake instruction in the data, the Auditor agreed with the hijacked answer, and I only found out because I tried to attack my own system. I had also expected the graph to make the agent more accurate, and it didn’t: a docs-only agent did slightly better. But the graph was about 9 times cheaper, and every claim came with a receipt.
 
 ## Why a graph
 
@@ -61,7 +61,7 @@ A differential fuzzer built 2,000 random graphs and compared FalkorDB with Netwo
 2. **A path is never extended past a node it already visited.** openCypher only forbids reusing a relationship, not a node.
 3. **`algo.betweenness` is a sampled estimate.** It differed from the exact answer in most of my random graphs. I replaced it in my own code with exact Brandes betweenness.
 
-Each has a tiny repro in the repo, and CI runs them. These are correctness bugs, not security vulnerabilities, and they are findings for version 4.18.3 only; I haven't tested other versions yet. [NEHA: one sentence on what testing the database taught you.]
+Each has a tiny repro in the repo, and CI runs them. These are correctness bugs, not security vulnerabilities, and they are findings for version 4.18.3 only; I haven't tested other versions yet. I learned that a quiet bug is worse than a crash: FalkorDB returned a clean result that was missing nodes, and nothing warned me until the fuzzer compared it with NetworkX.
 
 ## Real data, not just a made-up company
 
