@@ -1,4 +1,4 @@
-# Benchmark: does the graph help? (skeleton; numbers filled in only from real runs)
+# Benchmark: does the graph help?
 
 ## Question
 Given the same alert storm, does an agent team that works through a dependency graph in FalkorDB find the real root cause more often, and with fewer unsupported claims, than an agent that only has the same facts as documents and keyword search?
@@ -23,15 +23,37 @@ Top-1 and top-3 root cause, triggering deploy identified, invalid citations, fac
 3. Failures are listed per scenario, not hidden in an average.
 
 ## Results
-_Not run yet._ Dev-only sanity check with the rule policy (written while looking at the dev scenarios, so a plumbing check, not evidence): 9/9 single-cause dev scenarios correct, ambiguous dev scenario correctly abstained.
+Final held-out runs, Sat Oct 17 2026 (one run per condition, `--final`, no code changed between runs). Top-1 is over single-cause scenarios (test: 18 of 20; extended: 55 of 60); the rest are two-cause "ambiguous" scenarios, where the right answer is to abstain.
 
-Budget: the docs-only baseline costs about $0.07 per investigation, so it runs on the 20-scenario test split only; the graph conditions run on test and extended.
+**Test split (20 scenarios, held out)**
 
-| Condition | Top-1 | Top-3 | Deploy found | Invalid citations | Correct abstain | Cost / investigation |
-|---|---|---|---|---|---|---|
-| A graph-llm | TBD | TBD | TBD | TBD | TBD | TBD |
-| B docs-llm | TBD | TBD | TBD | TBD | TBD | TBD |
-| graph-rules (floor) | TBD | TBD | TBD | TBD | TBD | $0 |
+| Condition | Top-1 | Top-3 | Deploy found | Invalid citations | Wrong abstentions | Correct abstentions | Cost (total / per run) | Mean latency |
+|---|---|---|---|---|---|---|---|---|
+| A graph-llm | 0.833 (15/18) | 1.000 | 0.778 | 3 | 2 | 2/2 | $0.157 / $0.008 | 13.2 s |
+| B docs-llm | **0.944 (17/18)** | 0.944 | **0.944** | 0 | 1 | 1/2 | $1.389 / $0.069 | 16.3 s |
+| graph-rules (floor, no LLM) | 0.889 (16/18) | 1.000 | 0.889 | 0 | 0 | 2/2 | $0 | 0.14 s |
+| graph-coverage-only (ablation) | 0.722 (13/18) | 0.778 | 0.722 | 0 | 0 | 2/2 | $0 | 0.13 s |
+
+**Extended split (60 scenarios, held out; docs-llm not run for cost)**
+
+| Condition | Top-1 | Top-3 | Deploy found | Invalid citations | Wrong abstentions | Correct abstentions | Cost | Mean latency |
+|---|---|---|---|---|---|---|---|---|
+| A graph-llm | 0.873 (48/55) | 0.982 | 0.818 | 0 | 1 | 5/5 | $0.466 | 11.9 s |
+| graph-rules (floor) | 0.873 | 0.982 | 0.873 | 0 | 0 | 5/5 | $0 | 0.12 s |
+| graph-coverage-only | 0.727 | 0.855 | 0.727 | 0 | 0 | 5/5 | $0 | 0.13 s |
+
+By tier on the test split (top-1): easy graph-llm 0.75 / docs-llm 1.00 / rules 1.00; medium 1.00 / 1.00 / 1.00; hard 0.75 / 0.875 / 0.75. On the extended split (graph-llm and graph-rules identical): easy 1.00, medium 1.00, hard 0.731 (26 scenarios).
+
+### What this says, plainly
+- **The docs-only agent was more accurate than our graph agent on the test split** (top-1 0.944 vs 0.833; 3 scenarios apart on n=18, which is a small, noisy difference). We do not claim the graph agent is more accurate. The docs agent also abstained wrongly once and missed one of two ambiguous cases.
+- **The graph agent was about 9x cheaper per investigation** ($0.008 vs $0.069) and slightly faster (13.2 s vs 16.3 s mean).
+- **The graph agent made 3 invalid citations on the test split** (the docs agent, which cites documents, had none). The server's citation check rejects these before they are stored; they are counted here because the agent attempted them. It made 0 on the extended split.
+- **The LLM did not beat the deterministic no-LLM policy.** graph-rules matched or beat graph-llm on both splits (test 0.889 vs 0.833; extended 0.873 vs 0.873) at zero cost. Most of the accuracy comes from the graph ranking, not the model.
+- **Ranking by coverage x precision matters:** coverage-only is clearly worse (0.722 test, 0.727 extended) than graph-rules.
+- **Where everything struggles:** hard scenarios (0.73 to 0.88 top-1). On the extended split, all of the misses are hard scenarios or two-cause cases, and 5 of 7 single-cause misses are in the `boutique` world, the one no rule or prompt was tuned on.
+- Total spend for all final runs: about $2.01 (graph-llm $0.157 + $0.466, docs-llm $1.389).
+
+Per-scenario results, including every miss, are in `bench/results/test-*.json` and `bench/results/extended-*.json`.
 
 ## Dev-split results with the real model (Oct 15; practice scenarios only, NOT the evidence)
 Prompts were still being fixed during this run, so treat it as a smoke test.
