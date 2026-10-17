@@ -1,6 +1,6 @@
 # Demo script (about 2.5 minutes)
 
-Numbers marked [TBD] come from the final benchmark (Saturday night). Everything else matches the current screen.
+Numbers come from the final held-out benchmark (Sat Oct 17, docs/BENCHMARK.md). Everything else matches the current screen. Live site: https://blast-radius-lemon.vercel.app/
 
 1. **Hook (0:00, 10 s).** Opening screen. Say: "Six alerts at 3 AM. None of them is the problem." Point at the map: 30 services of a fake company, stored as a graph in FalkorDB.
 2. **Break it (0:10, 15 s).** Press **Break something at random**. Red nodes appear. Say: "I don't know what I just broke, and neither do the agents. Every visitor gets a private copy of this graph."
@@ -10,4 +10,4 @@ Numbers marked [TBD] come from the final benchmark (Saturday night). Everything 
 6. **Late alert (1:40, 15 s).** Press **⚡ A late alert arrives**. "Only the findings that touched the new alert are redone. The rest are kept."
 7. **Memory (1:55, 20 s).** Press **Mark resolved**, then **↻ Same failure again**, then **Investigate**. The blue line: "Remembered: this matches INC-…, which you resolved a moment ago."
 8. **Ask + your own system (2:15, 10 s).** Click an example question under the Ask box; show its receipt. Optionally open **+ your docker-compose…** to show any architecture can be loaded.
-9. **Close (2:25, 10 s).** Benchmark: graph agents vs a docs-only agent on 20 held-out scenarios: [TBD]. Cost per investigation: about $0.008 (graph) vs about $0.07 (docs, dev estimate). "Break it yourself at [site URL]."
+9. **Close (2:25, 10 s).** Benchmark: graph agents vs a docs-only agent on 20 held-out scenarios: the docs-only agent was slightly more accurate (17 of 18 vs 15 of 18 top-1), but the graph agent was about 9x cheaper ($0.008 vs $0.069 per investigation) and every claim carries a graph receipt; the no-LLM graph ranking alone got 16 of 18 at $0. "Break it yourself at https://blast-radius-lemon.vercel.app/."
