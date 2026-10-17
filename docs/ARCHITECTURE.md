@@ -217,6 +217,15 @@ sends a `game` event with the running totals (`GET /api/scoreboard`).
 Also: `GET /api/ready` checks that the database answers, and the web screen polls it on load ("Waking up the
 server…") instead of hanging while a free-tier server cold-starts. The database client now has socket timeouts.
 
+## 25. Security (Oct 17)
+
+Red-team tests in `backend/tests/test_security.py`, write-up in SECURITY.md. Changes they caused: the compose
+importer validates names (Docker-style), caps services and edges, rejects cycles and walks the parsed YAML with a
+node budget; a global per-minute limit on model runs; the daily caps live in FalkorDB (`limits` graph) so restarts
+do not reset them; a daily Discord post cap; the Auditor checks that the verdict agrees with the graph's best
+explanation. `bench/hijack_radius.py` answers the security question for the package worlds (whose next release
+would reach the most packages).
+
 ## Not built yet
 
 Ripple in the web screen, real-model tuning on dev scenarios, re-recording the replay from a real run, the final benchmark on the held-out test split, BENCHMARK.md, the blog and demo script.

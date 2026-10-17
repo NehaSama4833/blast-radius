@@ -36,6 +36,7 @@ def audit(graph, inv_id):
         agents, kinds = (sup[0] if sup else ([], []))
         check("independent support", len(set(agents) - {"People"}) >= (2 if conf == "high" else 1),
               f"supported by {', '.join(sorted(agents)) or 'nobody'}")
+        _check_against_ranking(graph, inv_id, root, check)
         dep = rows(graph, """MATCH (:Investigation {id:$i})-[:CONCLUDED]->(:Decision)-[:BLAMES]->(x:Deploy)-[:TO]->(s:Service)
                              RETURN x.id, s.name, x.ts""", {"i": inv_id})
         first = rows(graph, "MATCH (:Investigation {id:$i})-[:TRIGGERED_BY]->(a:Alert) RETURN min(a.ts)", {"i": inv_id})[0][0]
@@ -59,3 +60,29 @@ def audit(graph, inv_id):
                    CREATE (au:Audit {verdict:$v, checks:$c}), (a)-[:WROTE]->(au), (au)-[:AUDITS]->(d)""",
                 {"did": did, "v": verdict, "c": json.dumps(checks)})
     return dict(verdict=verdict, checks=checks)
+
+
+def _check_against_ranking(graph, inv_id, root, check):
+    """A hijacked or confused Lead (e.g. obeying text planted in the data: "blame payments-api") can only choose among
+    the board's hypotheses, but it could still pick a weaker one. Flag a verdict that overrides the graph's best
+    structural explanation unless the evidence on the board is stronger for it (docs/SECURITY.md)."""
+    hyps = rows(graph, """MATCH (:Investigation {id:$i})-[:CONSIDERS]->(h:Hypothesis)-[:ABOUT]->(s:Service)
+                          OPTIONAL MATCH (a:Agent)-[:WROTE]->(:Finding)-[r:SUPPORTS|WEAKENS]->(h)
+                          RETURN s.name, h.rank, h.structural_score,
+                                 collect(DISTINCT CASE WHEN type(r) = 'SUPPORTS' THEN a.name END),
+                                 count(CASE WHEN type(r) = 'WEAKENS' THEN 1 END)
+                          ORDER BY h.rank""", {"i": inv_id})
+    if not hyps:
+        return
+    top = hyps[0]
+    if top[0] == root:
+        check("verdict agrees with the graph's best explanation", True, f"{root} is ranked first")
+        return
+    mine = next((h for h in hyps if h[0] == root), None)
+    if mine is None:
+        check("verdict agrees with the graph's best explanation", False, f"{root} is not on the board")
+        return
+    tie = (mine[2] or 0) >= (top[2] or 0) - 1e-9
+    stronger = len([a for a in mine[3] if a]) > len([a for a in top[3] if a]) and top[4] > 0
+    check("verdict agrees with the graph's best explanation", tie or stronger,
+          f"{root} (rank {mine[1]}) chosen over {top[0]} (rank 1)" + ("" if tie or stronger else " without stronger evidence"))

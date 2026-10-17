@@ -1,0 +1,355 @@
+[
+ {
+  "ecosystem": "pypi",
+  "packages": 14997,
+  "hops": 3,
+  "top": [
+   {
+    "package": "typing-extensions",
+    "reach": 6672,
+    "share": 0.4449,
+    "direct": 2047,
+    "falkordb_reach": 6672,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "idna",
+    "reach": 3706,
+    "share": 0.2471,
+    "direct": 59,
+    "falkordb_reach": 3706,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "certifi",
+    "reach": 3456,
+    "share": 0.2304,
+    "direct": 184,
+    "falkordb_reach": 3456,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "requests",
+    "reach": 3123,
+    "share": 0.2082,
+    "direct": 1565,
+    "falkordb_reach": 3123,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "urllib3",
+    "reach": 3074,
+    "share": 0.205,
+    "direct": 394,
+    "falkordb_reach": 3074,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "packaging",
+    "reach": 2840,
+    "share": 0.1894,
+    "direct": 806,
+    "falkordb_reach": 2840,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "charset-normalizer",
+    "reach": 2773,
+    "share": 0.1849,
+    "direct": 43,
+    "falkordb_reach": 2773,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "numpy",
+    "reach": 2219,
+    "share": 0.148,
+    "direct": 1572,
+    "falkordb_reach": 2219,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "python-dateutil",
+    "reach": 2178,
+    "share": 0.1452,
+    "direct": 497,
+    "falkordb_reach": 2178,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "six",
+    "reach": 2158,
+    "share": 0.1439,
+    "direct": 352,
+    "falkordb_reach": 2158,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "pyyaml",
+    "reach": 1918,
+    "share": 0.1279,
+    "direct": 796,
+    "falkordb_reach": 1918,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "colorama",
+    "reach": 1853,
+    "share": 0.1236,
+    "direct": 161,
+    "falkordb_reach": 1853,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "pydantic",
+    "reach": 1837,
+    "share": 0.1225,
+    "direct": 1054,
+    "falkordb_reach": 1837,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "typing-inspection",
+    "reach": 1686,
+    "share": 0.1124,
+    "direct": 17,
+    "falkordb_reach": 1686,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "annotated-types",
+    "reach": 1673,
+    "share": 0.1116,
+    "direct": 10,
+    "falkordb_reach": 1673,
+    "agrees": true,
+    "note": ""
+   }
+  ],
+  "bfs_seconds": 0.1,
+  "cypher_seconds": 0.2,
+  "all_agree": true
+ },
+ {
+  "ecosystem": "npm",
+  "packages": 50000,
+  "hops": 3,
+  "top": [
+   {
+    "package": "debug",
+    "reach": 4884,
+    "share": 0.0977,
+    "direct": 1223,
+    "falkordb_reach": 4884,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "tslib",
+    "reach": 4153,
+    "share": 0.0831,
+    "direct": 1893,
+    "falkordb_reach": 4153,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "ms",
+    "reach": 3767,
+    "share": 0.0753,
+    "direct": 91,
+    "falkordb_reach": 3767,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "semver",
+    "reach": 2781,
+    "share": 0.0556,
+    "direct": 797,
+    "falkordb_reach": 2781,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "lodash",
+    "reach": 2706,
+    "share": 0.0541,
+    "direct": 1607,
+    "falkordb_reach": 2706,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "chalk",
+    "reach": 2439,
+    "share": 0.0488,
+    "direct": 1147,
+    "falkordb_reach": 2439,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "minimatch",
+    "reach": 2336,
+    "share": 0.0467,
+    "direct": 298,
+    "falkordb_reach": 2336,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "zod",
+    "reach": 2277,
+    "share": 0.0455,
+    "direct": 1153,
+    "falkordb_reach": 2277,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "mime-types",
+    "reach": 2122,
+    "share": 0.0424,
+    "direct": 186,
+    "falkordb_reach": 2122,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "@types/node",
+    "reach": 1965,
+    "share": 0.0393,
+    "direct": 419,
+    "falkordb_reach": 1965,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "commander",
+    "reach": 1914,
+    "share": 0.0383,
+    "direct": 837,
+    "falkordb_reach": 1914,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "graceful-fs",
+    "reach": 1887,
+    "share": 0.0377,
+    "direct": 148,
+    "falkordb_reach": 1887,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "readable-stream",
+    "reach": 1885,
+    "share": 0.0377,
+    "direct": 207,
+    "falkordb_reach": 1885,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "hasown",
+    "reach": 1790,
+    "share": 0.0358,
+    "direct": 30,
+    "falkordb_reach": 1790,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "fast-deep-equal",
+    "reach": 1722,
+    "share": 0.0344,
+    "direct": 109,
+    "falkordb_reach": 1722,
+    "agrees": true,
+    "note": ""
+   },
+   {
+    "package": "ua-parser-js",
+    "reach": 89,
+    "share": 0.0018,
+    "direct": 32,
+    "falkordb_reach": 89,
+    "agrees": true,
+    "note": "hijacked (2021)"
+   },
+   {
+    "package": "event-stream",
+    "reach": 67,
+    "share": 0.0013,
+    "direct": 25,
+    "falkordb_reach": 67,
+    "agrees": true,
+    "note": "malicious dependency (2018)"
+   },
+   {
+    "package": "colors",
+    "reach": 270,
+    "share": 0.0054,
+    "direct": 127,
+    "falkordb_reach": 270,
+    "agrees": true,
+    "note": "sabotaged (2022)"
+   },
+   {
+    "package": "node-ipc",
+    "reach": 9,
+    "share": 0.0002,
+    "direct": 5,
+    "falkordb_reach": 9,
+    "agrees": true,
+    "note": "protestware (2022)"
+   },
+   {
+    "package": "coa",
+    "reach": 2,
+    "share": 0.0,
+    "direct": 1,
+    "falkordb_reach": 2,
+    "agrees": true,
+    "note": "hijacked (2021)"
+   },
+   {
+    "package": "rc",
+    "reach": 162,
+    "share": 0.0032,
+    "direct": 26,
+    "falkordb_reach": 162,
+    "agrees": true,
+    "note": "hijacked (2021)"
+   },
+   {
+    "package": "is-promise",
+    "reach": 551,
+    "share": 0.011,
+    "direct": 26,
+    "falkordb_reach": 551,
+    "agrees": true,
+    "note": "broken release (2020)"
+   }
+  ],
+  "bfs_seconds": 0.5,
+  "cypher_seconds": 0.3,
+  "all_agree": true
+ }
+]

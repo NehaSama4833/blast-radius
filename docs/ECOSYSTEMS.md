@@ -154,3 +154,43 @@ run, so all of this is held-out):
 - Median query time 0.11 s on the full 5.5 M-release graph. The graph walk matched a Python BFS in 30/30 runs.
 - Same limits as PyPI: dependency edges are from the snapshot date, which dependents fail is simulated, and only
   runtime dependencies are walked.
+
+## Part 3: whose next release would hurt most?
+
+`python -m bench.hijack_radius` asks a security question of the same two graphs: if one package's next release were
+malicious (a hijacked account, a sabotaged release), how many packages depend on it through runtime dependencies
+within 3 hops, and so could install that release on their next fresh install or CI run (if their version ranges
+allow it)? The ranking is an exact reverse BFS over every package; each count on the list was then recomputed
+inside FalkorDB with one Cypher query and **all of them matched**.
+
+```cypher
+MATCH p=(u:Service)-[:DEPENDS_ON*1..3 {kind:'sync'}]->(:Service {name:$n}) RETURN count(DISTINCT u)
+```
+
+| PyPI (14,997 packages) | reach | share | direct dependents |
+|---|---:|---:|---:|
+| typing-extensions | 6,672 | **44.5%** | 2,047 |
+| idna | 3,706 | 24.7% | **59** |
+| certifi | 3,456 | 23.0% | 184 |
+| requests | 3,123 | 20.8% | 1,565 |
+| urllib3 | 3,074 | 20.5% | 394 |
+| charset-normalizer | 2,773 | 18.5% | **43** |
+| annotated-types | 1,673 | 11.2% | **10** |
+
+| npm (50,000 packages) | reach | share | direct dependents |
+|---|---:|---:|---:|
+| debug | 4,884 | 9.8% | 1,223 |
+| tslib | 4,153 | 8.3% | 1,893 |
+| ms | 3,767 | 7.5% | **91** |
+| semver | 2,781 | 5.6% | 797 |
+| lodash | 2,706 | 5.4% | 1,607 |
+| hasown | 1,790 | 3.6% | **30** |
+
+The same lesson as the outages, at ecosystem scale: **the dangerous packages are often the quiet ones.** idna
+has only 59 direct dependents among the top PyPI packages but sits under a quarter of them, because `requests`
+depends on it; `ms` is used directly by 91 npm packages but reaches 3,767 through `debug`. Counting direct
+dependents (what a package page shows) misses them; walking the graph finds them.
+
+The real npm incidents, for scale, in this slice: colors 270 packages (0.5%), is-promise 551 (1.1%), rc 162,
+ua-parser-js 89, event-stream 67, node-ipc 9. Their real damage came largely from applications and from download
+volume, which a slice of popular *libraries* under-counts. Full lists: `bench/results/hijack_radius.json`.

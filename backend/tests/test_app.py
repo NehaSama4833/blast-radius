@@ -15,6 +15,7 @@ from backend.graph.db import drop_graph
 def client():
     main.limiter = RateLimiter(1000, 60)
     main.daily = DailyCap(1000)
+    main._spend = RateLimiter(10000, 60)
     c = TestClient(main.app)
     yield c
     for n in sandbox.list_sandboxes():

@@ -17,7 +17,7 @@ from backend.actions.discord import post_incident
 from backend.agents.memory import record_resolution
 from backend.agents.runner import run_investigation
 from backend.agents.llm_policy import LLMPolicy
-from backend.app.limits import DailyCap, RateLimiter
+from backend.app.limits import DailyCap, GraphDailyCap, RateLimiter
 from backend.graph import sandbox
 from backend.graph.db import get_db, get_graph
 from backend.world import CONFIGS, failure, get_world, topology as topo
@@ -54,8 +54,10 @@ app.add_middleware(CORSMiddleware, allow_origins=[o for o in os.environ.get("ALL
                    allow_methods=["GET", "POST"], allow_headers=["*"])
 
 limiter = RateLimiter(n=int(os.environ.get("RATE_LIMIT_PER_MIN", "30")), per_s=60)
-daily = DailyCap(int(os.environ.get("DAILY_INVESTIGATION_CAP", "200")))
+daily = GraphDailyCap(int(os.environ.get("DAILY_INVESTIGATION_CAP", "200")), "investigations")   # survives restarts
 _posts = RateLimiter(n=5, per_s=60)
+_posts_daily = GraphDailyCap(int(os.environ.get("DAILY_POST_CAP", "25")), "discord_posts")
+_spend = RateLimiter(n=int(os.environ.get("GLOBAL_LLM_PER_MIN", "20")), per_s=60)   # all visitors together: cannot be dodged
 _asks = RateLimiter(n=6, per_s=60)          # free-text questions cost model tokens: tighter limit per visitor
 _tmpl_lock = threading.Lock()
 
@@ -267,7 +269,7 @@ def investigate(body: Investigate, req: Request):
     alerting = [r[0] for r in g.query("MATCH (a:Alert)-[:ON]->(s:Service) WHERE a.ts >= $since AND a.resolved IS NULL RETURN DISTINCT s.name", {"since": now - 3600}).result_set]
     if not alerting:
         raise HTTPException(400, "no recent alerts: press a chaos button first")
-    if not daily.take():
+    if not _spend.allow("global") or not daily.take():
         return _replay()
     q: queue.Queue = queue.Queue()
     if body.sandbox in LAST:
@@ -425,7 +427,7 @@ def ask_graph(body: Ask, req: Request):
     client = make_ask_client()
     if client is None:
         raise HTTPException(503, "Ask the graph needs a model key on the server; everything else works without one")
-    if not daily.take():
+    if not _spend.allow("global") or not daily.take():
         raise HTTPException(503, "daily limit reached")
     try:
         return ask(g, body.question, client)
@@ -484,4 +486,6 @@ def post(body: Post, req: Request):
         raise HTTPException(404, "no drafted message for that investigation")
     if not _posts.allow("global"):
         raise HTTPException(429, "posting is rate limited")
+    if not _posts_daily.take():
+        raise HTTPException(429, "daily Discord post limit reached")
     return post_incident(r[0][0])           # the server posts ITS OWN drafted text, never text from the client

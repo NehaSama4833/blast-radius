@@ -10,12 +10,13 @@ Blast Radius is a team of AI agents that investigates outages by walking a compa
 
 Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Connected Data) and 02 (Agent Memory and Coordination).
 
-## Three things nobody else did
+## Four things nobody else did
 
 | | |
 |---|---|
 | **We tested FalkorDB itself** | A differential fuzzer ran FalkorDB's path queries and algorithms on 2,000 random graphs against NetworkX and brute force. It found **3 reproducible issues** in FalkorDB 4.18.3, each shrunk to a 3- or 4-node graph: a bounded variable-length pattern that misses reachable nodes on a DAG, paths that are never extended past a repeated node, and `algo.betweenness` returning 0, 1 or 2 where the exact answer is 1. One affected us, and we fixed it. [docs/FALKORDB_FINDINGS.md](docs/FALKORDB_FINDINGS.md) |
-| **A real, huge graph** | Two real package ecosystems in FalkorDB: **64,997 PyPI and npm packages, 208,433 dependencies and 6,682,104 real releases**. We replayed **31 real supply-chain incidents**: numpy 2.0, setuptools 72, urllib3 2.0, requests 2.32, the **colors.js sabotage**, the **ua-parser-js hijack**, **node-ipc protestware**, event-stream, is-promise, eslint 9 and more. The culprit release was ranked first in **91 of 93** runs, and in **51 of 51** runs that were never used to tune anything, among ~685 (PyPI) and ~2,600 (npm) releases in the same 48 hours, in about 0.1 s per query. Packages, edges, release times and culprits are real; which dependents fail is simulated. [docs/ECOSYSTEMS.md](docs/ECOSYSTEMS.md) |
+| **A real, huge graph** | Two real package ecosystems in FalkorDB: **64,997 PyPI and npm packages, 208,433 dependencies and 6,682,104 real releases**. We replayed **31 real supply-chain incidents**: numpy 2.0, setuptools 72, urllib3 2.0, requests 2.32, the **colors.js sabotage**, the **ua-parser-js hijack**, **node-ipc protestware**, event-stream, is-promise, eslint 9 and more. The culprit release was ranked first in **91 of 93** runs, and in **51 of 51** runs that were never used to tune anything, among ~685 (PyPI) and ~2,600 (npm) releases in the same 48 hours, in about 0.1 s per query. Packages, edges, release times and culprits are real; which dependents fail is simulated. And a security finding from the same graph: **idna has only 59 direct dependents, yet a malicious idna release could reach 24.7% of the top 15,000 PyPI packages within 3 hops** (typing-extensions: 44.5%). [docs/ECOSYSTEMS.md](docs/ECOSYSTEMS.md) |
+| **We attacked our own site** | 32 red-team tests: write attempts through the Cypher escape hatch, a YAML "billion laughs" bomb, prompt injection hidden in service names and in the data, `@everyone` pings, IP spoofing to burn the model budget, restarts to reset the daily cap. One test caught a real gap: a hijacked Lead could pick a weaker hypothesis and the Auditor agreed. Now the Auditor flags it. [docs/SECURITY.md](docs/SECURITY.md) |
 | **Beat the agents** | Break something, click the service you think did it and lock in your guess, then let the agents race you. Every round is stored in a shared FalkorDB graph, so the page shows humans vs. agents across all visitors. |
 
 ## What makes it different
@@ -177,6 +178,8 @@ RETURN h.id, h.rank, h.structural_score, h.status, s.name, f.id, f.kind, f.text,
 | FalkorDB differential fuzz (2,000 graphs) | `python -m bench.fuzz_falkordb --graphs 2000 --seed 20261017` | [docs/FALKORDB_FINDINGS.md](docs/FALKORDB_FINDINGS.md) |
 | the 3 FalkorDB reproductions | `python -m bench.falkordb_repros` (or `FALKORDB_URL=... ` for a server) | [docs/FALKORDB_FINDINGS.md](docs/FALKORDB_FINDINGS.md) |
 | 21 real PyPI incidents | `python -m bench.pypi_incidents --split dev` and `--split test` | [docs/ECOSYSTEMS.md](docs/ECOSYSTEMS.md) |
+| hijack blast radius (PyPI, npm) | `python -m bench.hijack_radius` | [docs/ECOSYSTEMS.md](docs/ECOSYSTEMS.md) |
+| attacks on our own site (red-team tests) | `pytest backend/tests/test_security.py` | [docs/SECURITY.md](docs/SECURITY.md) |
 | 10 real npm incidents (5.5 M releases) | `python scripts/fetch_npm.py --max 50000` then `python -m bench.npm_incidents` (or the committed slice, same results) | [docs/ECOSYSTEMS.md](docs/ECOSYSTEMS.md) |
 
 The held-out runner refuses to run without `--final`, and the scenario files are checked against their generator by a test, so nobody can tune on them by accident.
