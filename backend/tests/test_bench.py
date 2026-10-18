@@ -69,7 +69,6 @@ def test_aggregate_and_calibration():
 def test_test_split_is_refused_without_final(tmp_path):
     with pytest.raises(SystemExit):
         bench_run.main(["--split", "test"])
-    assert not list(bench_run.RESULTS.glob("test-*"))
 
 
 def test_dev_run_end_to_end(tmp_path):

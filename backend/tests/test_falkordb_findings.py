@@ -1,8 +1,9 @@
 """FalkorDB behaviours found by bench/fuzz_falkordb.py, and proof that Blast Radius does not depend on them.
 
-The three `xfail(strict=True)` tests assert the *correct* answer. They fail today (so they are expected failures);
-if a FalkorDB release fixes one, the test passes, strict mode turns that into a failure, and CI tells us to update
-docs/FALKORDB_FINDINGS.md. CI runs them against the falkordb/falkordb:latest server as well as the embedded build.
+The F1-F3 tests assert the *correct* answer. F1 and F2 reproduce on 4.18.3 but no longer on the latest server image
+used in CI, so they are non-strict xfails (expected to fail on 4.18.3, allowed to pass on newer servers). F3 still
+reproduces and stays `xfail(strict=True)`: if a release fixes it, CI fails and tells us to update
+docs/FALKORDB_FINDINGS.md. CI runs them against the falkordb/falkordb:latest server; locally they run on the embedded build.
 """
 import random
 from collections import defaultdict
@@ -15,13 +16,13 @@ from backend.graph.db import get_graph
 from backend.tools.centrality import betweenness
 
 
-@pytest.mark.xfail(strict=True, reason="F1: unbound typed variable-length pattern misses a reachable node")
+@pytest.mark.xfail(strict=False, reason="reproduces on 4.18.3; fixed in newer FalkorDB")
 def test_f1_unbound_varlen():
     r = R.f1_unbound_varlen_misses_nodes()
     assert r["got"] == r["expected"]
 
 
-@pytest.mark.xfail(strict=True, reason="F2: a path is never extended past a repeated node")
+@pytest.mark.xfail(strict=False, reason="reproduces on 4.18.3; fixed in newer FalkorDB")
 def test_f2_expansion_past_start():
     r = R.f2_expansion_stops_at_repeated_node()
     assert r["got"] == r["expected"]

@@ -61,7 +61,7 @@ A differential fuzzer built 2,000 random graphs and compared FalkorDB with Netwo
 2. **A path is never extended past a node it already visited.** openCypher only forbids reusing a relationship, not a node.
 3. **`algo.betweenness` is a sampled estimate.** It differed from the exact answer in most of my random graphs. I replaced it in my own code with exact Brandes betweenness.
 
-Each has a tiny repro in the repo, and CI runs them. These are correctness bugs, not security vulnerabilities, and they are findings for version 4.18.3 only; I haven't tested other versions yet. I learned that a quiet bug is worse than a crash: FalkorDB returned a clean result that was missing nodes, and nothing warned me until the fuzzer compared it with NetworkX.
+Each has a tiny repro in the repo, and CI runs them. These are correctness bugs, not security vulnerabilities, and they were found on version 4.18.3. F1 and F2 reproduce on 4.18.3; on the latest server image used in CI they no longer reproduce. F3 still does. I learned that a quiet bug is worse than a crash: FalkorDB returned a clean result that was missing nodes, and nothing warned me until the fuzzer compared it with NetworkX.
 
 ## Real data, not just a made-up company
 

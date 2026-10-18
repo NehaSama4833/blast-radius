@@ -190,7 +190,7 @@ After the Lead decides, the simulation result and the fact-check are stored on t
 brute-force path enumeration: variable-length patterns with and without a path variable, unbounded reachability,
 `shortestPath`, `algo.BFS`, `algo.WCC`, `algo.pageRank`, `algo.betweenness`, `algo.SPpaths`, `algo.MSF`. Three
 differences were shrunk to 3- or 4-node graphs (`bench/falkordb_repros.py`) and written up in FALKORDB_FINDINGS.md.
-The repros are `xfail(strict=True)` tests, so CI notices when a FalkorDB release fixes one. `algo.betweenness`
+The repros are `xfail` tests. F1 and F2 reproduce on 4.18.3; on the latest server image used in CI they no longer reproduce. F3 still does. F3 stays `xfail(strict=True)`, so CI notices if a release fixes it. `algo.betweenness`
 turned out to be a sampled estimate, so `critical_services` now computes exact betweenness (Brandes, in
 `backend/tools/centrality.py`) over the edges it reads from FalkorDB. Our variable-length query shapes were checked
 to be on the safe side of the other two findings (`test_our_query_shapes_are_not_affected_by_f1`).

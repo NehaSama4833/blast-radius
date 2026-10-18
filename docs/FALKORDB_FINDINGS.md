@@ -104,8 +104,11 @@ YIELD node, score WHERE node.name = 'b' RETURN score
 | F2 | **No.** Service dependency graphs are acyclic. | Documented. An imported docker-compose file with a dependency cycle could be affected. |
 | F3 | **Yes.** `critical_services` (what the What-if panel and the agents use to say "this is a chokepoint") ranked by `algo.betweenness`. | Replaced with an exact Brandes implementation over the edges read from FalkorDB (`backend/tools/centrality.py`, checked against NetworkX on 2,000 graphs). PageRank still comes from FalkorDB. |
 
-The three reproductions are `xfail(strict=True)` tests: they assert the correct answer, so when a FalkorDB release
-fixes one, CI fails and tells us to update this page.
+F1 and F2 reproduce on 4.18.3; on the latest server image used in CI they no longer reproduce. F3 still does.
+
+The three reproductions are `xfail` tests that assert the correct answer. F1 and F2 are non-strict, so they may
+pass on newer servers; F3 is `xfail(strict=True)`, so when a FalkorDB release fixes it, CI fails and tells us to
+update this page.
 
 ## Draft issue for FalkorDB
 
