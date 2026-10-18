@@ -15,7 +15,7 @@ Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks entered:
 - **Track 01: Agents That Act on Connected Data**
 - **Track 02: Agent Memory and Coordination**
 
-## Four things nobody else did
+## Four things we’re proud of
 
 | | |
 |---|---|
@@ -260,7 +260,7 @@ No Docker? Create a free instance at FalkorDB Cloud and use its connection strin
 
 ## AI assistance disclosure
 
-AI assistants were used while building this project: **Claude** (Anthropic) and **ChatGPT** (OpenAI). Claude wrote most of the code, tests and documentation from Neha's design and decisions. Neha Sharma reviewed, tested and directed the work, and can explain the graph model, the queries and the architecture.
+Neha Sharma built this project with the help of AI assistants: **Claude** (Anthropic) and **ChatGPT** (OpenAI). Claude wrote most of the code, tests and documentation from her design and decisions. Neha reviewed, tested and directed the work, and can explain the graph model, the queries and the architecture.
 
 At runtime the agents use Claude models (Sonnet 5.5 lead, Haiku 5.5 specialists) through the Anthropic API; without a key the app falls back to a deterministic rule policy, so the demo never depends on the model. All benchmark numbers come from the scripts listed above, never from a model's text.
 
