@@ -2,13 +2,18 @@
 
 [![ci](https://github.com/NehaSama4833/blast-radius/actions/workflows/ci.yml/badge.svg)](https://github.com/NehaSama4833/blast-radius/actions/workflows/ci.yml)
 
+**Live site: [blast-radius-lemon.vercel.app](https://blast-radius-lemon.vercel.app/)**. Break something, then press Investigate. If the server has been idle, the site shows a wake-up screen first.
+
 > **Six alerts at 3 AM. None of them is the problem.**
 
 ![Demo: break something, five agents walk the graph, the silent culprit is found with receipts](docs/demo.gif)
 
 Blast Radius is a team of AI agents that investigates outages by walking a company's **dependency graph in FalkorDB**. The real cause is often a quiet database one hop below everything that is on fire, with no alert of its own. The agents find it, **prove every claim with a graph receipt**, and **test the fix on a copy of the graph** before a human approves it.
 
-Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Connected Data) and 02 (Agent Memory and Coordination).
+Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks entered:
+
+- **Track 01: Agents That Act on Connected Data**
+- **Track 02: Agent Memory and Coordination**
 
 ## Four things nobody else did
 
@@ -37,7 +42,7 @@ Built for Graph Hacks (WeMakeDevs x FalkorDB). Tracks 01 (Agents That Act on Con
 | **Postmortem from memory** | After resolving, one click renders a postmortem (timeline, cause, evidence, hypotheses ruled out, lesson saved) purely from the investigation's nodes. No model writes it, so it cannot invent anything. |
 | **Real topology too** | Besides two synthetic companies, the `boutique` world is the service graph of Google's open-source Online Boutique microservices demo (monitoring flags, teams and history are our synthetic additions). |
 | **Scales** | Exact branch-and-bound ranking: about 0.4 s for a 28-alert storm in a 2,000-service graph and under 2 s at 10,000 services, same top 5 as scoring everyone ([docs/SCALE.md](docs/SCALE.md)). |
-| **Honest benchmark** | Graph agents vs. a docs-only agent with the same facts as Markdown + BM25 search, on 20 held-out scenarios frozen before any test run. See [docs/BENCHMARK.md](docs/BENCHMARK.md). |
+| **Honest benchmark** | Graph agents vs. a docs-only agent with the same facts as Markdown + BM25 search, on 20 held-out scenarios frozen before any test run, plus 60 extended held-out scenarios. The docs-only agent was more accurate on the test split; the [results](#benchmark-results-final-held-out) say so. |
 
 **Try it:** press *Break something at random* (the culprit is hidden from you and the agents), then *Investigate*. Click any service to see what would break if it failed. Every visitor gets a private copy of the company graph.
 
@@ -64,7 +69,7 @@ Remove FalkorDB and there is no ranking, no board, no memory, no sandbox and no 
 
 Alerts arrive. The Lead calls `rank_root_causes` (parameterized Cypher finds who can reach whom; plain Python scores coverage x precision) and writes the top 3 hypotheses to the board. Four specialists run in parallel with tools scoped to their role (`recent_changes`, `blast_radius`, `similar_incidents`/`lessons_for`, `find_experts`) and write findings with citations. The Lead reads the board from the graph, decides or abstains, simulates the fix on a graph copy, and drafts a message for Discord. Plain-language tour: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Full design: [docs/DESIGN.md](docs/DESIGN.md).
 
-**Cost:** about $0.008 per investigation with Claude (Sonnet 5.5 lead, Haiku 5.5 specialists), about 8x cheaper than the docs-only baseline on the dev scenarios.
+**Cost:** $0.008 per investigation with Claude (Sonnet 5.5 lead, Haiku 5.5 specialists), against $0.069 for the docs-only baseline on the held-out test split ([results](#benchmark-results-final-held-out)).
 
 ## Graph data model
 
@@ -166,6 +171,42 @@ RETURN h.id, h.rank, h.structural_score, h.status, s.name, f.id, f.kind, f.text,
 ```
 **Memory write-back** (`memory.py`): `CREATE (n:Incident {...}), (i)-[:BECAME]->(n), (n)-[:RESOLVED_BY]->(:Resolution {...}), (n)-[:AFFECTED]->(s)`, then a `Lesson` upsert linked `ABOUT` the service and `LEARNED_FROM` the incident.
 
+## Benchmark results (final, held out)
+
+Copied from [docs/BENCHMARK.md](docs/BENCHMARK.md), which also has the method and the dev-split smoke test.
+
+Final held-out runs, Sat Oct 17 2026 (one run per condition, `--final`, no code changed between runs). Top-1 is over single-cause scenarios (test: 18 of 20; extended: 55 of 60); the rest are two-cause "ambiguous" scenarios, where the right answer is to abstain.
+
+**Test split (20 scenarios, held out)**
+
+| Condition | Top-1 | Top-3 | Deploy found | Invalid citations | Wrong abstentions | Correct abstentions | Cost (total / per run) | Mean latency |
+|---|---|---|---|---|---|---|---|---|
+| A graph-llm | 0.833 (15/18) | 1.000 | 0.778 | 3 | 2 | 2/2 | $0.157 / $0.008 | 13.2 s |
+| B docs-llm | **0.944 (17/18)** | 0.944 | **0.944** | 0 | 1 | 1/2 | $1.389 / $0.069 | 16.3 s |
+| graph-rules (floor, no LLM) | 0.889 (16/18) | 1.000 | 0.889 | 0 | 0 | 2/2 | $0 | 0.14 s |
+| graph-coverage-only (ablation) | 0.722 (13/18) | 0.778 | 0.722 | 0 | 0 | 2/2 | $0 | 0.13 s |
+
+**Extended split (60 scenarios, held out; docs-llm not run for cost)**
+
+| Condition | Top-1 | Top-3 | Deploy found | Invalid citations | Wrong abstentions | Correct abstentions | Cost | Mean latency |
+|---|---|---|---|---|---|---|---|---|
+| A graph-llm | 0.873 (48/55) | 0.982 | 0.818 | 0 | 1 | 5/5 | $0.466 | 11.9 s |
+| graph-rules (floor) | 0.873 | 0.982 | 0.873 | 0 | 0 | 5/5 | $0 | 0.12 s |
+| graph-coverage-only | 0.727 | 0.855 | 0.727 | 0 | 0 | 5/5 | $0 | 0.13 s |
+
+By tier on the test split (top-1): easy graph-llm 0.75 / docs-llm 1.00 / rules 1.00; medium 1.00 / 1.00 / 1.00; hard 0.75 / 0.875 / 0.75. On the extended split (graph-llm and graph-rules identical): easy 1.00, medium 1.00, hard 0.731 (26 scenarios).
+
+### What this says, plainly
+- **The docs-only agent was more accurate than our graph agent on the test split** (top-1 0.944 vs 0.833; 3 scenarios apart on n=18, which is a small, noisy difference). We do not claim the graph agent is more accurate. The docs agent also abstained wrongly once and missed one of two ambiguous cases.
+- **The graph agent was about 9x cheaper per investigation** ($0.008 vs $0.069) and slightly faster (13.2 s vs 16.3 s mean).
+- **The graph agent made 3 invalid citations on the test split** (the docs agent, which cites documents, had none). The server's citation check rejects these before they are stored; they are counted here because the agent attempted them. It made 0 on the extended split.
+- **The LLM did not beat the deterministic no-LLM policy.** graph-rules matched or beat graph-llm on both splits (test 0.889 vs 0.833; extended 0.873 vs 0.873) at zero cost. Most of the accuracy comes from the graph ranking, not the model.
+- **Ranking by coverage x precision matters:** coverage-only is clearly worse (0.722 test, 0.727 extended) than graph-rules.
+- **Where everything struggles:** hard scenarios (0.73 to 0.88 top-1). On the extended split, all of the misses are hard scenarios or two-cause cases, and 5 of 7 single-cause misses are in the `boutique` world, the one no rule or prompt was tuned on.
+- Total spend for all final runs: about $2.01 (graph-llm $0.157 + $0.466, docs-llm $1.389).
+
+Per-scenario results, including every miss, are in `bench/results/test-*.json` and `bench/results/extended-*.json`.
+
 ## Reproduce every number
 
 | Claim | Command | Write-up |
@@ -219,7 +260,9 @@ No Docker? Create a free instance at FalkorDB Cloud and use its connection strin
 
 ## AI assistance disclosure
 
-This project was built by Neha Sharma with Claude (Anthropic) as a coding assistant: Claude wrote most of the code, tests and documentation from Neha's design and decisions, and Neha reviewed, tested and directed the work. At runtime the agents use Claude models (Sonnet 5.5 lead, Haiku 5.5 specialists) through the Anthropic API; without a key the app falls back to a deterministic rule policy, so the demo never depends on the model. All benchmark numbers come from the scripts listed above, never from a model's text.
+AI assistants were used while building this project: **Claude** (Anthropic) and **ChatGPT** (OpenAI). Claude wrote most of the code, tests and documentation from Neha's design and decisions. Neha Sharma reviewed, tested and directed the work, and can explain the graph model, the queries and the architecture.
+
+At runtime the agents use Claude models (Sonnet 5.5 lead, Haiku 5.5 specialists) through the Anthropic API; without a key the app falls back to a deterministic rule policy, so the demo never depends on the model. All benchmark numbers come from the scripts listed above, never from a model's text.
 
 ## License
 
