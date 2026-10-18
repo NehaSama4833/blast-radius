@@ -260,7 +260,7 @@ No Docker? Create a free instance at FalkorDB Cloud and use its connection strin
 
 ## AI assistance disclosure
 
-I'm Neha Sharma, and I built this project with the help of AI assistants: **Claude** (Anthropic) and **ChatGPT** (OpenAI). Claude wrote most of the code, tests and documentation from my design and decisions. I reviewed, tested and directed the work, and I can explain the graph model, the queries and the architecture.
+I'm Neha Sharma, and I built this project with the help of an AI assistant, **Claude** (Anthropic). Claude wrote most of the code, tests and documentation from my design and decisions. I reviewed, tested and directed the work, and I can explain the graph model, the queries and the architecture.
 
 At runtime the agents use Claude models (Sonnet 5.5 lead, Haiku 5.5 specialists) through the Anthropic API; without a key the app falls back to a deterministic rule policy, so the demo never depends on the model. All benchmark numbers come from the scripts listed above, never from a model's text.
 

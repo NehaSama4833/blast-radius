@@ -107,6 +107,6 @@ The company worlds are synthetic, and the failure model shares assumptions with 
 
 ## Built with
 
-FalkorDB (Cypher, `GRAPH.COPY`, `RO_QUERY`, PageRank), Claude (Sonnet 5.5 lead, Haiku 5.5 specialists), FastAPI, React, Cytoscape, and an MCP server so other agents can use the same graph tools. I used Claude and ChatGPT as AI assistants while building this; I reviewed the work and can explain the graph model, the queries and the architecture.
+FalkorDB (Cypher, `GRAPH.COPY`, `RO_QUERY`, PageRank), Claude (Sonnet 5.5 lead, Haiku 5.5 specialists), FastAPI, React, Cytoscape, and an MCP server so other agents can use the same graph tools. I used Claude as an AI assistant while building this; I reviewed the work and can explain the graph model, the queries and the architecture.
 
 At 3 AM, a plausible answer isn't enough. The evidence has to be traceable, the database has to be tested, and the system has to know when to hand the decision to a human. That's what I tried to build.
