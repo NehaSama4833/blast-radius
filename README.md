@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/NehaSama4833/blast-radius/actions/workflows/ci.yml/badge.svg)](https://github.com/NehaSama4833/blast-radius/actions/workflows/ci.yml)
 
-**Live site: [blast-radius-lemon.vercel.app](https://blast-radius-lemon.vercel.app/)**. Break something, then press Investigate. If the server has been idle, the site shows a wake-up screen first.
+**Live site: [blast-radius-lemon.vercel.app](https://blast-radius-lemon.vercel.app/)** · **Demo video: [youtu.be/rctMAqZqiik](https://youtu.be/rctMAqZqiik)**. Break something, then press Investigate. If the server has been idle, the site shows a wake-up screen first.
 
 > **Six alerts at 3 AM. None of them is the problem.**
 

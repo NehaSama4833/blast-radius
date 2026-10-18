@@ -2,7 +2,7 @@
 
 *Blast Radius: a team of AI agents that finds the real cause of an outage by walking a graph in FalkorDB. Built for Graph Hacks (Tracks 01 and 02).*
 
-**Live demo:** [blast-radius-lemon.vercel.app](https://blast-radius-lemon.vercel.app/) · **Code:** [github.com/NehaSama4833/blast-radius](https://github.com/NehaSama4833/blast-radius) · **Video:** [LINK]
+**Live demo:** [blast-radius-lemon.vercel.app](https://blast-radius-lemon.vercel.app/) · **Code:** [github.com/NehaSama4833/blast-radius](https://github.com/NehaSama4833/blast-radius) · **Video:** [youtu.be/rctMAqZqiik](https://youtu.be/rctMAqZqiik)
 
 ---
 
